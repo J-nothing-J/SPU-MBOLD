@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+
+{% block title %}จัดการผู้ใช้ | SPU Medbay{% endblock %}
+
+{% block content %}
+<section class="split-grid">
+    <article class="panel">
+        <h1>{% if edit_user %}แก้ไขผู้ใช้{% else %}เพิ่มผู้ใช้ใหม่{% endif %}</h1>
+
+        <form method="post" class="stack-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_user">
+            <input type="hidden" name="edit_username" value="{% if edit_user %}{{ edit_user.username }}{% endif %}">
+
+            {% if user_form.non_field_errors %}
+            <div class="message error">{{ user_form.non_field_errors|join:', ' }}</div>
+            {% endif %}
+
+            <label>
+                {{ user_form.username.label }}
+                {{ user_form.username }}
+                {% if user_form.username.errors %}<span class="field-error">{{ user_form.username.errors|join:', ' }}</span>{% endif %}
+            </label>
+
+            <label>
+                {{ user_form.first_name.label }}
+                {{ user_form.first_name }}
+                {% if user_form.first_name.errors %}<span class="field-error">{{ user_form.first_name.errors|join:', ' }}</span>{% endif %}
+            </label>
+
+            <label>
+                {{ user_form.last_name.label }}
+                {{ user_form.last_name }}
+                {% if user_form.last_name.errors %}<span class="field-error">{{ user_form.last_name.errors|join:', ' }}</span>{% endif %}
+            </label>
+
+            <label>
+                {{ user_form.role.label }}
+                {{ user_form.role }}
+                {% if user_form.role.errors %}<span class="field-error">{{ user_form.role.errors|join:', ' }}</span>{% endif %}
+            </label>
+
+            <label>
+                {{ user_form.status.label }}
+                {{ user_form.status }}
+                {% if user_form.status.errors %}<span class="field-error">{{ user_form.status.errors|join:', ' }}</span>{% endif %}
+            </label>
+
+            <label>
+                {{ user_form.password.label }}
+                {{ user_form.password }}
+                {% if user_form.password.help_text %}<span class="field-help">{{ user_form.password.help_text }}</span>{% endif %}
+                {% if user_form.password.errors %}<span class="field-error">{{ user_form.password.errors|join:', ' }}</span>{% endif %}
+            </label>
+
+            <div class="toolbar-row">
+                <button type="submit" class="btn btn-primary">บันทึกผู้ใช้</button>
+                {% if edit_user %}
+                <a href="{% url 'user_management' %}" class="btn btn-secondary">ยกเลิกการแก้ไข</a>
+                {% endif %}
+            </div>
+        </form>
+    </article>
+
+    <article class="panel">
+        <h2>รายชื่อผู้ใช้</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>ชื่อผู้ใช้</th>
+                    <th>ชื่อ-นามสกุล</th>
+                    <th>บทบาท</th>
+                    <th>สถานะ</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in users %}
+                <tr>
+                    <td>{{ row.username }}</td>
+                    <td>{{ row.get_full_name|default:'-' }}</td>
+                    <td>{{ row.role }}</td>
+                    <td>{{ row.status }}</td>
+                    <td>
+                        <div class="table-actions">
+                            <a class="btn btn-secondary" href="{% url 'user_management' %}?edit={{ row.username }}">แก้ไข</a>
+                            <form method="post" class="inline-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_user">
+                                <input type="hidden" name="username" value="{{ row.username }}">
+                                <button
+                                    type="submit"
+                                    class="btn btn-secondary danger"
+                                    {% if row.username == request.user.username %}disabled{% endif %}
+                                    onclick="return confirm('ยืนยันการลบผู้ใช้ {{ row.username }} ?');"
+                                >
+                                    ลบ
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5">ยังไม่มีผู้ใช้ในระบบ</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </article>
+</section>
+{% endblock %}

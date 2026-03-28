@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}คลังยา | SPU Medbay{% endblock %}
+
+{% block content %}
+<section class="split-grid">
+    <article class="panel">
+        <h1>{% if edit_medicine %}แก้ไขข้อมูลยา{% else %}เพิ่มรายการยา{% endif %}</h1>
+
+        <form method="post" class="stack-form">
+            {% csrf_token %}
+            <input type="hidden" name="action" value="save_medicine">
+            <input type="hidden" name="edit_id" value="{% if edit_medicine %}{{ edit_medicine.id }}{% endif %}">
+
+            {% if medicine_form.non_field_errors %}
+            <div class="message error">{{ medicine_form.non_field_errors|join:', ' }}</div>
+            {% endif %}
+
+            <label>
+                {{ medicine_form.id.label }}
+                {{ medicine_form.id }}
+                {% if medicine_form.id.errors %}<span class="field-error">{{ medicine_form.id.errors|join:', ' }}</span>{% endif %}
+            </label>
+            <label>
+                {{ medicine_form.name.label }}
+                {{ medicine_form.name }}
+                {% if medicine_form.name.errors %}<span class="field-error">{{ medicine_form.name.errors|join:', ' }}</span>{% endif %}
+            </label>
+            <label>
+                {{ medicine_form.category.label }}
+                {{ medicine_form.category }}
+                {% if medicine_form.category.errors %}<span class="field-error">{{ medicine_form.category.errors|join:', ' }}</span>{% endif %}
+            </label>
+            <label>
+                {{ medicine_form.unit.label }}
+                {{ medicine_form.unit }}
+                {% if medicine_form.unit.errors %}<span class="field-error">{{ medicine_form.unit.errors|join:', ' }}</span>{% endif %}
+            </label>
+            <label>
+                {{ medicine_form.stock.label }}
+                {{ medicine_form.stock }}
+                {% if medicine_form.stock.errors %}<span class="field-error">{{ medicine_form.stock.errors|join:', ' }}</span>{% endif %}
+            </label>
+
+            <div class="toolbar-row">
+                <button type="submit" class="btn btn-primary">บันทึก</button>
+                {% if edit_medicine %}
+                <a href="{% url 'inventory' %}" class="btn btn-secondary">ยกเลิกการแก้ไข</a>
+                {% endif %}
+            </div>
+        </form>
+    </article>
+
+    <article class="panel">
+        <h2>รายการยา</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>รหัสยา</th>
+                    <th>ชื่อยา</th>
+                    <th>หมวด</th>
+                    <th>หน่วย</th>
+                    <th>คงเหลือ</th>
+                    <th>จัดการ</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for medicine in medicines %}
+                <tr class="{% if medicine.stock <= 10 %}row-warning{% endif %}">
+                    <td>{{ medicine.id }}</td>
+                    <td>{{ medicine.name }}</td>
+                    <td>{{ medicine.category }}</td>
+                    <td>{{ medicine.unit }}</td>
+                    <td>{{ medicine.stock }}</td>
+                    <td>
+                        <div class="table-actions">
+                            <a class="btn btn-secondary" href="{% url 'inventory' %}?edit={{ medicine.id }}">แก้ไข</a>
+                            <form method="post" class="inline-form">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="delete_medicine">
+                                <input type="hidden" name="medicine_id" value="{{ medicine.id }}">
+                                <button type="submit" class="btn btn-secondary danger" onclick="return confirm('ยืนยันการลบยา {{ medicine.id }} ?');">ลบ</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6">ยังไม่มีข้อมูลยา</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </article>
+</section>
+{% endblock %}

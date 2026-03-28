@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+
+{% block title %}แก้ไขผู้ป่วย {{ patient.student_id }} | SPU Medbay{% endblock %}
+
+{% block content %}
+<section class="panel narrow-panel">
+    <h1>แก้ไขข้อมูลผู้ป่วย</h1>
+
+    <form method="post" class="stack-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="message error">{{ form.non_field_errors|join:', ' }}</div>
+        {% endif %}
+
+        <label>
+            {{ form.student_id.label }}
+            {{ form.student_id }}
+            <div class="id-type-indicator" aria-live="polite">
+                <label class="id-type-flag">
+                    <input type="checkbox" id="id-type-student-flag" disabled>
+                    <span>Student ID (8 หลัก)</span>
+                </label>
+                <label class="id-type-flag">
+                    <input type="checkbox" id="id-type-employee-flag" disabled>
+                    <span>Employee ID (7 หลัก)</span>
+                </label>
+                <span class="id-type-hint" id="id-type-hint">กรอก 7 หรือ 8 หลักเพื่อให้ระบบระบุประเภทอัตโนมัติ</span>
+            </div>
+            {% if form.student_id.errors %}<span class="field-error">{{ form.student_id.errors|join:', ' }}</span>{% endif %}
+        </label>
+
+        <label>
+            {{ form.name.label }}
+            {{ form.name }}
+            {% if form.name.errors %}<span class="field-error">{{ form.name.errors|join:', ' }}</span>{% endif %}
+        </label>
+
+        <label>
+            {{ form.organization.label }}
+            {{ form.organization }}
+            {% if form.organization.errors %}<span class="field-error">{{ form.organization.errors|join:', ' }}</span>{% endif %}
+        </label>
+
+        <label>
+            {{ form.gender.label }}
+            {{ form.gender }}
+            {% if form.gender.errors %}<span class="field-error">{{ form.gender.errors|join:', ' }}</span>{% endif %}
+        </label>
+
+        <div class="toolbar-row">
+            <button type="submit" class="btn btn-primary">บันทึก</button>
+            <a href="{% url 'patients' %}" class="btn btn-secondary">กลับ</a>
+        </div>
+    </form>
+</section>
+
+{{ student_organization_options|json_script:"edit-student-organization-options" }}
+{{ employee_organization_options|json_script:"edit-employee-organization-options" }}
+
+<script>
+(function () {
+    const idInput = document.getElementById('id_student_id');
+    const organizationSelect = document.getElementById('id_organization');
+    const studentFlag = document.getElementById('id-type-student-flag');
+    const employeeFlag = document.getElementById('id-type-employee-flag');
+    const hint = document.getElementById('id-type-hint');
+
+    if (!idInput || !organizationSelect || !studentFlag || !employeeFlag || !hint) {
+        return;
+    }
+
+    const studentOptions = JSON.parse(document.getElementById('edit-student-organization-options').textContent);
+    const employeeOptions = JSON.parse(document.getElementById('edit-employee-organization-options').textContent);
+
+    function detectIdType(value) {
+        const cleaned = String(value || '').replace(/\D/g, '');
+        if (cleaned.length === 8) {
+            return 'student';
+        }
+        if (cleaned.length === 7) {
+            return 'employee';
+        }
+        return null;
+    }
+
+    function updateOrgOptions(idType) {
+        const currentValue = organizationSelect.value;
+        const isEmployee = idType === 'employee';
+        const options = isEmployee ? employeeOptions : studentOptions;
+        const placeholder = isEmployee ? 'เลือกหน่วยงาน' : 'เลือกคณะ';
+
+        organizationSelect.innerHTML = '';
+
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = placeholder;
+        organizationSelect.appendChild(placeholderOption);
+
+        options.forEach((item) => {
+            const opt = document.createElement('option');
+            opt.value = item.value;
+            opt.textContent = item.label;
+            organizationSelect.appendChild(opt);
+        });
+
+        const matched = options.some((item) => item.value === currentValue);
+        if (matched) {
+            organizationSelect.value = currentValue;
+        } else if (currentValue) {
+            const fallback = document.createElement('option');
+            fallback.value = currentValue;
+            fallback.textContent = `${currentValue} (ข้อมูลเดิม)`;
+            organizationSelect.appendChild(fallback);
+            organizationSelect.value = currentValue;
+        }
+    }
+
+    function updateIndicatorAndSelect() {
+        const normalized = (idInput.value || '').replace(/\D/g, '').slice(0, 8);
+        if (idInput.value !== normalized) {
+            idInput.value = normalized;
+        }
+
+        const idType = detectIdType(normalized);
+        studentFlag.checked = idType === 'student';
+        employeeFlag.checked = idType === 'employee';
+
+        if (idType === 'student') {
+            hint.textContent = 'Student ID (8 หลัก)';
+        } else if (idType === 'employee') {
+            hint.textContent = 'Employee ID (7 หลัก)';
+        } else {
+            hint.textContent = 'กรอก 7 หรือ 8 หลักเพื่อให้ระบบระบุประเภทอัตโนมัติ';
+        }
+
+        updateOrgOptions(idType);
+    }
+
+    idInput.addEventListener('input', updateIndicatorAndSelect);
+    updateIndicatorAndSelect();
+})();
+</script>
+{% endblock %}

@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+
+{% block title %}รายการเคส | SPU Medbay{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <div class="section-head">
+        <h1>รายการเคส</h1>
+        <a href="{% url 'new_case' %}" class="btn btn-primary">+ บันทึกเคสใหม่</a>
+    </div>
+
+    <form method="get" class="toolbar-row">
+        <label class="inline-control">
+            วันที่
+            <input type="date" name="date" value="{{ selected_date }}">
+        </label>
+        <button type="submit" class="btn btn-secondary">กรอง</button>
+        <a href="{% url 'cases' %}" class="btn btn-secondary">ล้างตัวกรอง</a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>รหัสเคส</th>
+                <th>วันเวลา</th>
+                <th>ผู้ป่วย</th>
+                <th>อาการ</th>
+                <th>ยา</th>
+                <th>สถานะ</th>
+                <th>จัดการ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for case in cases %}
+            <tr>
+                <td>{{ case.case_id }}</td>
+                <td>{{ case.occurred_at|date:'d/m/Y H:i' }}</td>
+                <td>{{ case.patient.student_id }} - {{ case.patient.name }}</td>
+                <td>{{ case.symptoms|truncatechars:90 }}</td>
+                <td>
+                    {% for link in case.prescribed_medicines.all %}
+                    <div>{{ link.medicine.name }} x {{ link.quantity }}</div>
+                    {% empty %}
+                    -
+                    {% endfor %}
+                </td>
+                <td>{{ case.status }}</td>
+                <td>
+                    <div class="table-actions">
+                        <a href="{% url 'case_edit' case.case_id %}" class="btn btn-secondary">แก้ไข</a>
+                        <form method="post" class="inline-form">
+                            {% csrf_token %}
+                            <input type="hidden" name="case_id" value="{{ case.case_id }}">
+                            <input type="hidden" name="date" value="{{ selected_date }}">
+                            {% if case.status != 'Discharged' %}
+                            <button type="submit" class="btn btn-secondary" name="action" value="discharge_case">จำหน่าย</button>
+                            {% endif %}
+                            <button type="submit" class="btn btn-secondary danger" name="action" value="delete_case" onclick="return confirm('ยืนยันการลบเคสนี้? ระบบจะคืนสต็อกยาให้อัตโนมัติ');">ลบ</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7">ไม่พบข้อมูลเคส</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

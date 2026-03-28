@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}แก้ไขเคส {{ case_obj.case_id }} | SPU Medbay{% endblock %}
+
+{% block content %}
+<section class="panel narrow-panel">
+    <h1>แก้ไขเคส {{ case_obj.case_id }}</h1>
+    <p class="muted">ผู้ป่วย: {{ case_obj.patient.student_id }} - {{ case_obj.patient.name }}</p>
+
+    <form method="post" class="stack-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="message error">{{ form.non_field_errors|join:', ' }}</div>
+        {% endif %}
+
+        <label>
+            {{ form.occurred_at.label }}
+            {{ form.occurred_at }}
+            {% if form.occurred_at.errors %}<span class="field-error">{{ form.occurred_at.errors|join:', ' }}</span>{% endif %}
+        </label>
+
+        <label>
+            {{ form.symptom_types_text.label }}
+            {{ form.symptom_types_text }}
+            <span class="field-help">{{ form.symptom_types_text.help_text }}</span>
+            {% if form.symptom_types_text.errors %}<span class="field-error">{{ form.symptom_types_text.errors|join:', ' }}</span>{% endif %}
+        </label>
+
+        <label>
+            {{ form.symptoms.label }}
+            {{ form.symptoms }}
+            {% if form.symptoms.errors %}<span class="field-error">{{ form.symptoms.errors|join:', ' }}</span>{% endif %}
+        </label>
+
+        <label class="checkbox-inline">
+            {{ form.needs_ward }}
+            <span>{{ form.needs_ward.label }}</span>
+        </label>
+
+        <label>
+            {{ form.status.label }}
+            {{ form.status }}
+            {% if form.status.errors %}<span class="field-error">{{ form.status.errors|join:', ' }}</span>{% endif %}
+        </label>
+
+        <div class="panel section-panel">
+            <h2>รายการยาที่จ่าย (อ่านอย่างเดียว)</h2>
+            <ul class="simple-list">
+                {% for link in medicine_links %}
+                <li>{{ link.medicine.id }} - {{ link.medicine.name }} x {{ link.quantity }}</li>
+                {% empty %}
+                <li>- ไม่มีรายการยา -</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="toolbar-row">
+            <button type="submit" class="btn btn-primary">บันทึกการแก้ไข</button>
+            <a href="{% url 'cases' %}" class="btn btn-secondary">กลับ</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

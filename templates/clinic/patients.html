@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}ข้อมูลผู้ป่วย | SPU Medbay{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>ข้อมูลผู้ป่วย</h1>
+
+    <form method="get" class="toolbar-row">
+        <input type="text" name="q" value="{{ search_term }}" placeholder="ค้นหาด้วยรหัส ชื่อ หรือคณะ/หน่วยงาน">
+        <button type="submit" class="btn btn-secondary">ค้นหา</button>
+        <a href="{% url 'patients' %}" class="btn btn-secondary">ล้าง</a>
+    </form>
+
+    <table>
+        <thead>
+            <tr>
+                <th>รหัสนักศึกษา / บุคลากร</th>
+                <th>ชื่อ</th>
+                <th>ประเภท</th>
+                <th>คณะ/หน่วยงาน</th>
+                <th>เพศ</th>
+                <th>จำนวนเคส</th>
+                <th>จัดการ</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for patient in patients %}
+            <tr>
+                <td>{{ patient.student_id }}</td>
+                <td>{{ patient.name }}</td>
+                <td>{{ patient.id_type }}</td>
+                <td>{{ patient.organization }}</td>
+                <td>{{ patient.gender }}</td>
+                <td>{{ patient.case_count }}</td>
+                <td>
+                    <a class="btn btn-secondary" href="{% url 'patient_edit' patient.student_id %}">แก้ไข</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="7">ไม่พบข้อมูลผู้ป่วย</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

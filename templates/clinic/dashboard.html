@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}แดชบอร์ด | SPU Medbay{% endblock %}
+
+{% block content %}
+<section>
+    <h1>แดชบอร์ด</h1>
+    <p class="muted">ภาพรวมข้อมูลผู้ป่วย เตียง และคลังยา ณ ตอนนี้</p>
+
+    <div class="stats-grid">
+        <article class="stat-card">
+            <h3>ผู้ป่วยทั้งหมด</h3>
+            <p>{{ total_patients }}</p>
+        </article>
+        <article class="stat-card">
+            <h3>เตียงที่ใช้งาน</h3>
+            <p>{{ occupied_beds }}/{{ total_beds }}</p>
+        </article>
+        <article class="stat-card">
+            <h3>รายการยา</h3>
+            <p>{{ total_medicines }}</p>
+        </article>
+        <article class="stat-card">
+            <h3>ยาใกล้หมด</h3>
+            <p>{{ low_stock_count }}</p>
+        </article>
+        <article class="stat-card">
+            <h3>เคสวันนี้</h3>
+            <p>{{ today_cases }}</p>
+        </article>
+    </div>
+
+    <div class="data-grid">
+        <article class="panel">
+            <h2>เคสล่าสุด</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>เวลา</th>
+                        <th>รหัสนักศึกษา / บุคลากร</th>
+                        <th>ชื่อ</th>
+                        <th>พยาบาล</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for case in recent_cases %}
+                    <tr>
+                        <td>{{ case.occurred_at|date:'d/m/Y H:i' }}</td>
+                        <td>{{ case.patient.student_id }}</td>
+                        <td>{{ case.patient.name }}</td>
+                        <td>{{ case.nurse.username|default:'-' }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4">ยังไม่มีข้อมูลเคส</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </article>
+
+        <article class="panel">
+            <h2>รายการยาใกล้หมด</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>รหัสยา</th>
+                        <th>ชื่อยา</th>
+                        <th>คงเหลือ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medicine in low_stock_medicines %}
+                    <tr>
+                        <td>{{ medicine.id }}</td>
+                        <td>{{ medicine.name }}</td>
+                        <td>{{ medicine.stock }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="3">ไม่มียาใกล้หมด</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </article>
+    </div>
+</section>
+{% endblock %}

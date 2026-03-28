@@ -1,0 +1,86 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SPU Medbay{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <div class="app-layout">
+        <aside class="sidebar">
+            <div class="brand">SPU Medbay</div>
+            <nav>
+                <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">
+                    <i class="fa-solid fa-gauge-high nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">แดชบอร์ด</span>
+                </a>
+                <a href="{% url 'new_case' %}" class="nav-link {% if request.path == '/new-case/' %}active{% endif %}">
+                    <i class="fa-solid fa-notes-medical nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">บันทึกเคสใหม่</span>
+                </a>
+                <a href="{% url 'cases' %}" class="nav-link {% if request.path == '/cases/' %}active{% endif %}">
+                    <i class="fa-solid fa-clipboard-list nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">รายการเคส</span>
+                </a>
+                <a href="{% url 'patients' %}" class="nav-link {% if request.path == '/patients/' %}active{% endif %}">
+                    <i class="fa-solid fa-user-group nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">ข้อมูลผู้ป่วย</span>
+                </a>
+                <a href="{% url 'inventory' %}" class="nav-link {% if request.path == '/inventory/' %}active{% endif %}">
+                    <i class="fa-solid fa-capsules nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">คลังยา</span>
+                </a>
+                <a href="{% url 'beds' %}" class="nav-link {% if request.path == '/beds/' %}active{% endif %}">
+                    <i class="fa-solid fa-bed nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">จัดการเตียง</span>
+                </a>
+                {% if user.role == 'Admin' %}
+                <a href="{% url 'user_management' %}" class="nav-link {% if request.path == '/users/' %}active{% endif %}">
+                    <i class="fa-solid fa-users-gear nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">จัดการผู้ใช้</span>
+                </a>
+                {% endif %}
+            </nav>
+        </aside>
+
+        <main class="content">
+            <header class="topbar">
+                <div class="topbar-user">
+                    <span>{{ user.get_full_name|default:user.username }}</span>
+                    <span class="badge">{{ user.role }}</span>
+                </div>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">ออกจากระบบ</button>
+                </form>
+            </header>
+
+            {% if messages %}
+            <section class="messages">
+                {% for message in messages %}
+                <div class="message {{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </section>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+    {% else %}
+    <main class="auth-wrapper">
+        {% if messages %}
+        <section class="messages">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+            {% endfor %}
+        </section>
+        {% endif %}
+        {% block auth_content %}{% endblock %}
+    </main>
+    {% endif %}
+</body>
+</html>

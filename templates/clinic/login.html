@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}เข้าสู่ระบบ | SPU Medbay{% endblock %}
+
+{% block auth_content %}
+<section class="login-card">
+    <h1>ระบบจัดการคลินิก SPU Medbay</h1>
+    <p>เลือกชื่อพยาบาลเพื่อเข้าสู่ระบบแบบคีออสก์ หรือเข้าสู่ระบบผู้ดูแลด้วยรหัสผ่าน</p>
+
+    <div class="login-grid">
+        <article class="panel">
+            <h2>คีออสก์พยาบาล</h2>
+            <p class="muted">แตะชื่อเพื่อเข้าสู่ระบบทันที</p>
+            <form method="post" action="{% url 'nurse_login' %}">
+                {% csrf_token %}
+                <div class="nurse-grid">
+                    {% for nurse in nurses %}
+                    <button class="btn btn-primary" type="submit" name="username" value="{{ nurse.username }}">
+                        {{ nurse.get_full_name|default:nurse.username }}
+                    </button>
+                    {% empty %}
+                    <div class="empty-box">ยังไม่มีผู้ใช้พยาบาลที่ใช้งานได้</div>
+                    {% endfor %}
+                </div>
+            </form>
+        </article>
+
+        <article class="panel">
+            <h2>เข้าสู่ระบบผู้ดูแล</h2>
+            <form method="post" action="{% url 'admin_login' %}" class="stack-form">
+                {% csrf_token %}
+                <label>
+                    ชื่อผู้ใช้
+                    <input type="text" name="username" autocomplete="username" required>
+                </label>
+                <label>
+                    รหัสผ่าน
+                    <input type="password" name="password" autocomplete="current-password" required>
+                </label>
+                <button class="btn btn-secondary" type="submit">เข้าสู่ระบบผู้ดูแล</button>
+            </form>
+        </article>
+    </div>
+
+    <div class="setup-hint">
+        <h3>เริ่มต้นใช้งานเร็ว</h3>
+        <p>รันคำสั่ง seed_initial_data เพื่อสร้างผู้ใช้ตัวอย่าง 1 Admin และ 3 Nurse</p>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+
+{% block title %}บันทึกเคสใหม่ | SPU Medbay{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>บันทึกเคสใหม่</h1>
+    <p class="muted">ระบบจะบันทึกข้อมูลผู้ป่วยและตัดสต็อกยาตามจำนวนที่สั่ง</p>
+
+    <form method="post" class="stack-form">
+        {% csrf_token %}
+
+        {% if form.non_field_errors %}
+        <div class="message error">{{ form.non_field_errors|join:', ' }}</div>
+        {% endif %}
+
+        <div class="form-grid two-col">
+            <label>
+                {{ form.student_id.label }}
+                {{ form.student_id }}
+                <div class="id-type-indicator" aria-live="polite">
+                    <label class="id-type-flag">
+                        <input type="checkbox" id="id-type-student-flag" disabled>
+                        <span>Student ID (8 หลัก)</span>
+                    </label>
+                    <label class="id-type-flag">
+                        <input type="checkbox" id="id-type-employee-flag" disabled>
+                        <span>Employee ID (7 หลัก)</span>
+                    </label>
+                    <span class="id-type-hint" id="id-type-hint">กรอก 7 หรือ 8 หลักเพื่อให้ระบบระบุประเภทอัตโนมัติ</span>
+                </div>
+                {% if form.student_id.errors %}<span class="field-error">{{ form.student_id.errors|join:', ' }}</span>{% endif %}
+            </label>
+            <label>
+                {{ form.name.label }}
+                {{ form.name }}
+                {% if form.name.errors %}<span class="field-error">{{ form.name.errors|join:', ' }}</span>{% endif %}
+            </label>
+            <label>
+                {{ form.organization.label }}
+                {{ form.organization }}
+                {% if form.organization.errors %}<span class="field-error">{{ form.organization.errors|join:', ' }}</span>{% endif %}
+            </label>
+            <label>
+                {{ form.gender.label }}
+                {{ form.gender }}
+                {% if form.gender.errors %}<span class="field-error">{{ form.gender.errors|join:', ' }}</span>{% endif %}
+            </label>
+            <label>
+                {{ form.occurred_at.label }}
+                {{ form.occurred_at }}
+                {% if form.occurred_at.errors %}<span class="field-error">{{ form.occurred_at.errors|join:', ' }}</span>{% endif %}
+            </label>
+            <label>
+                {{ form.symptom_types.label }}
+                {{ form.symptom_types }}
+                <span class="field-help">{{ form.symptom_types.help_text }}</span>
+                {% if form.symptom_types.errors %}<span class="field-error">{{ form.symptom_types.errors|join:', ' }}</span>{% endif %}
+            </label>
+        </div>
+
+        <label>
+            {{ form.symptoms.label }}
+            {{ form.symptoms }}
+            {% if form.symptoms.errors %}<span class="field-error">{{ form.symptoms.errors|join:', ' }}</span>{% endif %}
+        </label>
+
+        <label class="checkbox-inline">
+            {{ form.needs_ward }}
+            <span>{{ form.needs_ward.label }}</span>
+        </label>
+
+        <div class="panel section-panel">
+            <h2>รายการยาที่จ่าย</h2>
+            <p class="muted">เพิ่มได้หลายรายการ ระบบจะตรวจสอบสต็อกก่อนบันทึก</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 62%;">ยา</th>
+                        <th style="width: 20%;">จำนวน</th>
+                        <th style="width: 18%;">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="medicine-rows-body">
+                    {% for row in draft_medicine_rows %}
+                    <tr>
+                        <td>
+                            <select name="medicine_id" required>
+                                <option value="">-- เลือกยา --</option>
+                                {% for medicine in medicine_catalog %}
+                                <option value="{{ medicine.id }}" {% if row.medicine_id == medicine.id %}selected{% endif %}>
+                                    {{ medicine.id }} - {{ medicine.name }} (คงเหลือ {{ medicine.stock }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td>
+                            <input type="number" min="1" step="1" name="medicine_quantity" value="{{ row.quantity|default:'1' }}" required>
+                        </td>
+                        <td>
+                            <button type="button" class="btn btn-secondary remove-row-btn">ลบแถว</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div class="toolbar-row">
+                <button type="button" class="btn btn-secondary" id="add-medicine-row-btn">+ เพิ่มรายการยา</button>
+            </div>
+        </div>
+
+        <div class="toolbar-row">
+            <button type="submit" class="btn btn-primary">บันทึกเคส</button>
+            <a href="{% url 'cases' %}" class="btn btn-secondary">ไปยังรายการเคส</a>
+        </div>
+    </form>
+</section>
+
+{{ student_organization_options|json_script:"student-organization-options" }}
+{{ employee_organization_options|json_script:"employee-organization-options" }}
+
+<script>
+(function () {
+    const body = document.getElementById('medicine-rows-body');
+    const addButton = document.getElementById('add-medicine-row-btn');
+
+    if (!body || !addButton) {
+        return;
+    }
+
+    const medicineOptions = `
+<option value="">-- เลือกยา --</option>
+{% for medicine in medicine_catalog %}
+<option value="{{ medicine.id }}">{{ medicine.id }} - {{ medicine.name }} (คงเหลือ {{ medicine.stock }})</option>
+{% endfor %}
+`;
+
+    function makeRow() {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>
+                <select name="medicine_id" required>${medicineOptions}</select>
+            </td>
+            <td>
+                <input type="number" min="1" step="1" name="medicine_quantity" value="1" required>
+            </td>
+            <td>
+                <button type="button" class="btn btn-secondary remove-row-btn">ลบแถว</button>
+            </td>
+        `;
+        body.appendChild(tr);
+    }
+
+    function removeRow(button) {
+        const row = button.closest('tr');
+        if (!row) {
+            return;
+        }
+        if (body.children.length <= 1) {
+            row.querySelector('select[name="medicine_id"]').value = '';
+            row.querySelector('input[name="medicine_quantity"]').value = '1';
+            return;
+        }
+        row.remove();
+    }
+
+    addButton.addEventListener('click', makeRow);
+
+    body.addEventListener('click', (event) => {
+        const button = event.target.closest('.remove-row-btn');
+        if (!button) {
+            return;
+        }
+        removeRow(button);
+    });
+})();
+
+(function () {
+    const idInput = document.getElementById('id_student_id');
+    const organizationSelect = document.getElementById('id_organization');
+    const studentFlag = document.getElementById('id-type-student-flag');
+    const employeeFlag = document.getElementById('id-type-employee-flag');
+    const hint = document.getElementById('id-type-hint');
+
+    if (!idInput || !organizationSelect || !studentFlag || !employeeFlag || !hint) {
+        return;
+    }
+
+    const studentOptions = JSON.parse(document.getElementById('student-organization-options').textContent);
+    const employeeOptions = JSON.parse(document.getElementById('employee-organization-options').textContent);
+
+    function detectIdType(value) {
+        const cleaned = String(value || '').replace(/\D/g, '');
+        if (cleaned.length === 8) {
+            return 'student';
+        }
+        if (cleaned.length === 7) {
+            return 'employee';
+        }
+        return null;
+    }
+
+    function updateOrgOptions(idType) {
+        const currentValue = organizationSelect.value;
+        const isEmployee = idType === 'employee';
+        const options = isEmployee ? employeeOptions : studentOptions;
+        const placeholder = isEmployee ? 'เลือกหน่วยงาน' : 'เลือกคณะ';
+
+        organizationSelect.innerHTML = '';
+
+        const placeholderOption = document.createElement('option');
+        placeholderOption.value = '';
+        placeholderOption.textContent = placeholder;
+        organizationSelect.appendChild(placeholderOption);
+
+        options.forEach((item) => {
+            const opt = document.createElement('option');
+            opt.value = item.value;
+            opt.textContent = item.label;
+            organizationSelect.appendChild(opt);
+        });
+
+        const matched = options.some((item) => item.value === currentValue);
+        if (matched) {
+            organizationSelect.value = currentValue;
+        } else if (currentValue) {
+            const fallback = document.createElement('option');
+            fallback.value = currentValue;
+            fallback.textContent = `${currentValue} (ข้อมูลเดิม)`;
+            organizationSelect.appendChild(fallback);
+            organizationSelect.value = currentValue;
+        }
+    }
+
+    function updateIndicatorAndSelect() {
+        const normalized = (idInput.value || '').replace(/\D/g, '').slice(0, 8);
+        if (idInput.value !== normalized) {
+            idInput.value = normalized;
+        }
+
+        const idType = detectIdType(normalized);
+        studentFlag.checked = idType === 'student';
+        employeeFlag.checked = idType === 'employee';
+
+        if (idType === 'student') {
+            hint.textContent = 'Student ID (8 หลัก)';
+        } else if (idType === 'employee') {
+            hint.textContent = 'Employee ID (7 หลัก)';
+        } else {
+            hint.textContent = 'กรอก 7 หรือ 8 หลักเพื่อให้ระบบระบุประเภทอัตโนมัติ';
+        }
+
+        updateOrgOptions(idType);
+    }
+
+    idInput.addEventListener('input', updateIndicatorAndSelect);
+    updateIndicatorAndSelect();
+})();
+</script>
+{% endblock %}
