@@ -18,7 +18,7 @@
                     <i class="fa-solid fa-gauge-high nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">แดชบอร์ด</span>
                 </a>
-                <a href="{% url 'new_case' %}" class="nav-link {% if request.path == '/new-case/' %}active{% endif %}">
+                <a href="{% url 'new_case' %}" class="nav-link nav-link-cta {% if request.path == '/new-case/' %}active{% endif %}">
                     <i class="fa-solid fa-notes-medical nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">บันทึกเคสใหม่</span>
                 </a>

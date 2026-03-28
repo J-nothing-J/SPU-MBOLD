@@ -6,14 +6,15 @@
 }
 
 :root {
-    --bg: #f4f1ea;
-    --panel: #fffdf8;
-    --ink: #1f2c3a;
-    --muted: #5d6975;
-    --line: #d9d1c4;
-    --brand: #d95f39;
-    --brand-dark: #a94122;
-    --accent: #1f7a8c;
+    --bg: #f9f3f8;
+    --panel: #fffafe;
+    --ink: #17372c;
+    --muted: #4f685f;
+    --line: #dccfdb;
+    --brand: #ec008b;
+    --brand-dark: #bf006f;
+    --accent: #285A48;
+    --sidebar-width: 330px;
 }
 
 * {
@@ -25,8 +26,8 @@ body {
     font-family: "Google Sans", "Noto Sans Thai", "Segoe UI", sans-serif;
     color: var(--ink);
     background:
-        radial-gradient(circle at 15% 20%, rgba(217, 95, 57, 0.16), transparent 35%),
-        radial-gradient(circle at 80% 0%, rgba(31, 122, 140, 0.14), transparent 30%),
+    radial-gradient(circle at 15% 20%, rgba(236, 0, 139, 0.13), transparent 35%),
+    radial-gradient(circle at 80% 0%, rgba(40, 90, 72, 0.14), transparent 30%),
         var(--bg);
 }
 
@@ -38,43 +39,51 @@ a {
 .app-layout {
     min-height: 100vh;
     display: grid;
-    grid-template-columns: 260px 1fr;
+    grid-template-columns: var(--sidebar-width) 1fr;
 }
 
 .sidebar {
-    background: linear-gradient(190deg, #223645 0%, #1a2a38 100%);
+    background: linear-gradient(190deg, #2d6a56 0%, #1f4a3b 45%, #153429 100%);
     color: #f3eee4;
-    padding: 28px 18px;
+    padding: 34px 22px;
     display: flex;
     flex-direction: column;
-    gap: 24px;
+    gap: 28px;
 }
 
 .brand {
-    font-size: 1.35rem;
+    font-size: 1.75rem;
     font-weight: 700;
     letter-spacing: 0.5px;
+}
+
+.sidebar nav {
+    display: grid;
+    gap: 8px;
 }
 
 .nav-link {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    border-radius: 10px;
+    gap: 14px;
+    padding: 16px 16px;
+    min-height: 62px;
+    border-radius: 14px;
     color: #d7e3ec;
-    margin-bottom: 6px;
+    font-size: 1.15rem;
     transition: transform 0.2s ease, background 0.2s ease;
 }
 
 .nav-icon {
-    width: 18px;
+    width: 24px;
+    font-size: 1.35rem;
     text-align: center;
     opacity: 0.95;
 }
 
 .nav-label {
-    line-height: 1.2;
+    line-height: 1.3;
+    font-weight: 600;
 }
 
 .nav-link:hover {
@@ -83,8 +92,38 @@ a {
 }
 
 .nav-link.active {
-    background: rgba(217, 95, 57, 0.24);
+    background: rgba(236, 0, 139, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.25);
     color: #fff;
+}
+
+.nav-link-cta {
+    background: linear-gradient(140deg, rgba(236, 0, 139, 0.95), rgba(40, 90, 72, 0.96));
+    color: #fff8f0;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 10px 22px rgba(8, 13, 18, 0.35);
+}
+
+.nav-link-cta .nav-icon,
+.nav-link-cta .nav-label {
+    color: #fff;
+    opacity: 1;
+}
+
+.nav-link-cta .nav-label {
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.nav-link-cta:hover {
+    background: linear-gradient(140deg, rgba(236, 28, 151, 0.97), rgba(49, 108, 86, 0.98));
+    transform: translateX(5px);
+}
+
+.nav-link-cta.active {
+    background: linear-gradient(140deg, rgba(239, 44, 160, 0.99), rgba(52, 115, 91, 1));
+    border-color: rgba(255, 255, 255, 0.52);
+    box-shadow: 0 12px 24px rgba(8, 13, 18, 0.4);
 }
 
 .content {
@@ -105,9 +144,9 @@ a {
 }
 
 .badge {
-    background: rgba(31, 122, 140, 0.18);
-    color: #184a55;
-    border: 1px solid rgba(31, 122, 140, 0.3);
+    background: rgba(40, 90, 72, 0.16);
+    color: #224d3e;
+    border: 1px solid rgba(40, 90, 72, 0.35);
     padding: 2px 10px;
     border-radius: 999px;
     font-size: 0.82rem;
@@ -201,12 +240,12 @@ button {
 }
 
 .btn-secondary {
-    background: #eef5f7;
-    color: #234657;
+    background: #e7f1ed;
+    color: #244f3f;
 }
 
 .btn-secondary:hover {
-    background: #dfeef2;
+    background: #d8e9e2;
 }
 
 .messages {
@@ -451,13 +490,23 @@ th {
         position: sticky;
         top: 0;
         z-index: 4;
-        padding: 12px;
+        padding: 14px;
     }
 
     .sidebar nav {
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 8px;
+    }
+
+    .nav-link {
+        font-size: 1.02rem;
+        min-height: 56px;
+        padding: 12px;
+    }
+
+    .brand {
+        font-size: 1.3rem;
     }
 
     .login-grid,
@@ -481,5 +530,9 @@ th {
     .stats-grid,
     .sidebar nav {
         grid-template-columns: 1fr;
+    }
+
+    .nav-link {
+        min-height: 54px;
     }
 }
