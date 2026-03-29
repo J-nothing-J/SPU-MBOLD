@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 import os
 from pathlib import Path
+from urllib.parse import urlparse
 
 import dj_database_url
 
@@ -103,8 +104,19 @@ DATABASES = {
     }
 }
 
-if os.getenv('DATABASE_URL'):
-    DATABASES['default'] = dj_database_url.config(conn_max_age=600, ssl_require=not DEBUG)
+database_url = os.getenv('JAWSDB_URL') or os.getenv('DATABASE_URL')
+if database_url:
+    parsed_scheme = urlparse(database_url).scheme.lower()
+    use_ssl = not DEBUG and parsed_scheme.startswith(('postgres', 'postgresql'))
+    DATABASES['default'] = dj_database_url.parse(
+        database_url,
+        conn_max_age=600,
+        ssl_require=use_ssl,
+    )
+
+    if DATABASES['default'].get('ENGINE') == 'django.db.backends.mysql':
+        DATABASES['default'].setdefault('OPTIONS', {})
+        DATABASES['default']['OPTIONS'].setdefault('charset', 'utf8mb4')
 
 
 # Password validation
