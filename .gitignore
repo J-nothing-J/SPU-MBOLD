@@ -10,6 +10,7 @@ venv/
 # Django local database and runtime files
 db.sqlite3
 *.sqlite3
+staticfiles/
 
 # Environment files
 .env

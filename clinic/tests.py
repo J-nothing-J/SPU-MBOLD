@@ -282,3 +282,44 @@ class UserManagementFlowTests(TestCase):
 		self.client.force_login(self.nurse)
 		response = self.client.get(reverse('user_management'))
 		self.assertEqual(response.status_code, 302)
+
+	def test_admin_can_create_nurse_without_password(self):
+		self.client.force_login(self.admin)
+		response = self.client.post(
+			reverse('user_management'),
+			{
+				'action': 'save_user',
+				'edit_username': '',
+				'username': 'nurse_no_password',
+				'first_name': 'NoPass',
+				'last_name': 'Nurse',
+				'role': AppUser.Role.NURSE,
+				'status': AppUser.Status.ACTIVE,
+				'password': '',
+			},
+		)
+
+		self.assertEqual(response.status_code, 302)
+		created = AppUser.objects.get(username='nurse_no_password')
+		self.assertEqual(created.role, AppUser.Role.NURSE)
+		self.assertFalse(created.has_usable_password())
+
+	def test_admin_create_admin_without_password_is_rejected(self):
+		self.client.force_login(self.admin)
+		response = self.client.post(
+			reverse('user_management'),
+			{
+				'action': 'save_user',
+				'edit_username': '',
+				'username': 'admin_no_password',
+				'first_name': 'NoPass',
+				'last_name': 'Admin',
+				'role': AppUser.Role.ADMIN,
+				'status': AppUser.Status.ACTIVE,
+				'password': '',
+			},
+		)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertFalse(AppUser.objects.filter(username='admin_no_password').exists())
+		self.assertContains(response, 'กรอกรหัสผ่านสำหรับผู้ใช้ Admin ใหม่')

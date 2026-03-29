@@ -4,13 +4,14 @@
 
 {% block auth_content %}
 <section class="login-card">
-    <h1>ระบบจัดการคลินิก SPU Medbay</h1>
-    <p>เลือกชื่อพยาบาลเพื่อเข้าสู่ระบบแบบคีออสก์ หรือเข้าสู่ระบบผู้ดูแลด้วยรหัสผ่าน</p>
+    <h1>ระบบจัดการห้องพยาบาล | SPU Medbay</h1>
+    <h3>Campus: บางเขน | Bang Khen</h3>
+
 
     <div class="login-grid">
         <article class="panel">
-            <h2>คีออสก์พยาบาล</h2>
-            <p class="muted">แตะชื่อเพื่อเข้าสู่ระบบทันที</p>
+            <h2>เข้าสู่ระบบพยาบาล</h2>
+            <p class="muted">แตะชื่อเพื่อเข้าสู่ระบบ</p>
             <form method="post" action="{% url 'nurse_login' %}">
                 {% csrf_token %}
                 <div class="nurse-grid">

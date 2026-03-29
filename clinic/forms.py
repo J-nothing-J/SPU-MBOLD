@@ -289,10 +289,10 @@ class UserManagementForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
-            self.fields['password'].help_text = 'เว้นว่างหากไม่ต้องการเปลี่ยนรหัสผ่าน'
+            self.fields['password'].help_text = 'Nurse เว้นว่างได้, Admin ควรตั้งรหัสผ่านเพื่อเข้าใช้งาน'
         else:
-            self.fields['password'].required = True
-            self.fields['password'].help_text = 'จำเป็นสำหรับผู้ใช้ใหม่'
+            self.fields['password'].required = False
+            self.fields['password'].help_text = 'Admin ต้องมีรหัสผ่าน, Nurse เว้นว่างได้'
 
     def clean_username(self):
         username = (self.cleaned_data.get('username') or '').strip()
@@ -302,8 +302,16 @@ class UserManagementForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        if not (self.instance and self.instance.pk) and not cleaned_data.get('password'):
-            self.add_error('password', 'กรอกรหัสผ่านสำหรับผู้ใช้ใหม่')
+        role = cleaned_data.get('role')
+        raw_password = (cleaned_data.get('password') or '').strip()
+        is_edit = bool(self.instance and self.instance.pk)
+
+        if role == AppUser.Role.ADMIN:
+            if not is_edit and not raw_password:
+                self.add_error('password', 'กรอกรหัสผ่านสำหรับผู้ใช้ Admin ใหม่')
+            elif is_edit and not raw_password and not self.instance.has_usable_password():
+                self.add_error('password', 'บัญชี Admin นี้ยังไม่มีรหัสผ่าน กรุณาตั้งรหัสผ่าน')
+
         return cleaned_data
 
     def save(self, commit=True):
@@ -314,6 +322,9 @@ class UserManagementForm(forms.ModelForm):
         raw_password = self.cleaned_data.get('password')
         if raw_password:
             user.set_password(raw_password)
+        elif not (self.instance and self.instance.pk):
+            # New nurse accounts can be kiosk-only without password login.
+            user.set_unusable_password()
 
         if commit:
             user.save()
