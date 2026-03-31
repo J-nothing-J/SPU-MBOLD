@@ -4,13 +4,24 @@
 
 {% block auth_content %}
 <section class="login-card">
-    <h1>ระบบจัดการห้องพยาบาล | SPU Medbay</h1>
-    <h3>Campus: บางเขน | Bang Khen</h3>
+    <div class="login-hero">
+        <div class="login-hero-icon" aria-hidden="true">
+            <i class="fa-solid fa-hospital"></i>
+        </div>
+        <div class="login-hero-text">
+            <h1 class="login-hero-title">ระบบจัดการห้องพยาบาล | SP<span class="brand-u">U</span> Medbay</h1>
+            <p class="login-hero-campus">Campus: Bang Khen</p>
+            <p class="login-hero-clock" id="login-hero-clock"></p>
+        </div>
+    </div>
 
 
     <div class="login-grid">
         <article class="panel">
-            <h2>เข้าสู่ระบบพยาบาล</h2>
+            <h2 class="panel-title-icon">
+                <i class="fa-solid fa-user-nurse" aria-hidden="true"></i>
+                <span>เข้าสู่ระบบพยาบาล</span>
+            </h2>
             <p class="muted">แตะชื่อเพื่อเข้าสู่ระบบ</p>
             <form method="post" action="{% url 'nurse_login' %}">
                 {% csrf_token %}
@@ -27,7 +38,10 @@
         </article>
 
         <article class="panel">
-            <h2>เข้าสู่ระบบผู้ดูแล</h2>
+            <h2 class="panel-title-icon">
+                <i class="fa-solid fa-user-gear" aria-hidden="true"></i>
+                <span>เข้าสู่ระบบผู้ดูแล</span>
+            </h2>
             <form method="post" action="{% url 'admin_login' %}" class="stack-form">
                 {% csrf_token %}
                 <label>
@@ -44,4 +58,35 @@
     </div>
 
 </section>
+
+<script>
+(function () {
+    const clockEl = document.getElementById('login-hero-clock');
+    if (!clockEl) {
+        return;
+    }
+
+    const dateFormatter = new Intl.DateTimeFormat('th-TH', {
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric',
+        timeZone: 'Asia/Bangkok',
+    });
+    const timeFormatter = new Intl.DateTimeFormat('th-TH', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: 'Asia/Bangkok',
+    });
+
+    function updateClock() {
+        const now = new Date();
+        clockEl.textContent = `${dateFormatter.format(now)} เวลา ${timeFormatter.format(now)} น.`;
+    }
+
+    updateClock();
+    window.setInterval(updateClock, 1000);
+})();
+</script>
 {% endblock %}

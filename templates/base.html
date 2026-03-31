@@ -8,11 +8,17 @@
     <link rel="stylesheet" href="{% static 'css/app.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="{% if not user.is_authenticated and request.path == '/login/' %}login-page{% endif %}">
     {% if user.is_authenticated %}
     <div class="app-layout">
         <aside class="sidebar">
-            <div class="brand">SPU Medbay</div>
+            <div class="brand-block">
+                <div class="brand-row">
+                    <div class="brand">SP<span class="brand-u">U</span> Medbay</div>
+                    <span class="brand-version" aria-label="Version 0.2.069">v0.2.069</span>
+                </div>
+                <div class="brand-campus">Campus: Bang Khen</div>
+            </div>
             <nav>
                 <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">
                     <i class="fa-solid fa-gauge-high nav-icon" aria-hidden="true"></i>
@@ -45,20 +51,23 @@
                 </a>
                 {% endif %}
             </nav>
-        </aside>
 
-        <main class="content">
-            <header class="topbar">
+            <div class="sidebar-footer">
                 <div class="topbar-user">
                     <span>{{ user.get_full_name|default:user.username }}</span>
                     <span class="badge">{{ user.role }}</span>
                 </div>
-                <form method="post" action="{% url 'logout' %}">
+                <form method="post" action="{% url 'logout' %}" onsubmit="return confirm('ยืนยันการออกจากระบบใช่หรือไม่?');">
                     {% csrf_token %}
-                    <button type="submit" class="btn btn-secondary">ออกจากระบบ</button>
+                    <button type="submit" class="btn btn-logout">
+                        <i class="fa-solid fa-right-from-bracket" aria-hidden="true"></i>
+                        <span>ออกจากระบบ</span>
+                    </button>
                 </form>
-            </header>
+            </div>
+        </aside>
 
+        <main class="content">
             {% if messages %}
             <section class="messages">
                 {% for message in messages %}
@@ -81,6 +90,10 @@
         {% endif %}
         {% block auth_content %}{% endblock %}
     </main>
+    {% endif %}
+
+    {% if not user.is_authenticated and request.path == '/login/' %}
+    <div class="app-version-number" role="contentinfo" aria-label="Current version 0.2.069">0.2.069</div>
     {% endif %}
 </body>
 </html>
