@@ -3,6 +3,15 @@
 {% block title %}เข้าสู่ระบบ | SPU Medbay{% endblock %}
 
 {% block auth_content %}
+<div id="login-demo-popup" class="login-demo-popup" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="login-demo-popup-title">
+    <div class="login-demo-popup-backdrop" data-login-demo-close></div>
+    <section class="login-demo-popup-panel" role="document">
+        <h2 id="login-demo-popup-title">Notice</h2>
+        <p>This is demo website.</p>
+        <button type="button" class="btn btn-secondary login-demo-popup-btn" data-login-demo-close>OK</button>
+    </section>
+</div>
+
 <section class="login-card">
     <div class="login-hero">
         <div class="login-hero-icon" aria-hidden="true">
@@ -62,6 +71,36 @@
 <script>
 (function () {
     const clockEl = document.getElementById('login-hero-clock');
+    const popup = document.getElementById('login-demo-popup');
+
+    if (popup) {
+        const closeTargets = popup.querySelectorAll('[data-login-demo-close]');
+
+        function openPopup() {
+            popup.classList.add('is-open');
+            popup.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('login-demo-popup-open');
+        }
+
+        function closePopup() {
+            popup.classList.remove('is-open');
+            popup.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('login-demo-popup-open');
+        }
+
+        closeTargets.forEach(function (item) {
+            item.addEventListener('click', closePopup);
+        });
+
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && popup.classList.contains('is-open')) {
+                closePopup();
+            }
+        });
+
+        openPopup();
+    }
+
     if (!clockEl) {
         return;
     }

@@ -29,7 +29,7 @@ body {
     radial-gradient(circle at 15% 20%, rgba(236, 0, 139, 0.13), transparent 35%),
     radial-gradient(circle at 80% 0%, rgba(40, 90, 72, 0.14), transparent 30%),
         var(--bg);
-    padding-bottom: 34px;
+    padding-bottom: 0;
 }
 
 body.login-page {
@@ -53,6 +53,7 @@ a {
     min-height: 100vh;
     display: grid;
     grid-template-columns: var(--sidebar-width) 1fr;
+    align-items: start;
 }
 
 .sidebar {
@@ -126,13 +127,13 @@ a {
     display: grid;
     gap: 8px;
     flex: 1;
+    min-height: 0;
     align-content: start;
 }
 
 .sidebar-footer {
     margin-top: auto;
-    padding-top: 14px;
-    border-top: 1px solid rgba(255, 255, 255, 0.18);
+    padding-top: 0;
     display: grid;
     gap: 10px;
 }
@@ -149,6 +150,232 @@ a {
 
 .sidebar-footer .btn {
     width: 100%;
+}
+
+.sidebar-quick-buttons {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+.quick-btn {
+    min-height: 86px;
+    border-radius: 20px;
+    border: 1px solid #d7d2ca;
+    background: #ece9e2;
+    color: #313437;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    transition: transform 0.2s ease, background 0.2s ease;
+    cursor: pointer;
+}
+
+.quick-btn i {
+    color: #9a5f12;
+    font-size: 1.28rem;
+}
+
+.quick-btn-team {
+    font-family: inherit;
+}
+
+.quick-btn:hover {
+    background: #f3f1eb;
+    transform: translateY(-1px);
+}
+
+.quick-btn.active {
+    background: #e0dbd0;
+    border-color: #c8c0b2;
+}
+
+body.team-modal-open {
+    overflow: hidden;
+}
+
+.team-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 35;
+    display: none;
+}
+
+.team-modal.is-open {
+    display: block;
+}
+
+.team-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(12, 22, 31, 0.6);
+}
+
+.team-modal-panel {
+    position: relative;
+    width: min(1220px, 95vw);
+    max-height: 92vh;
+    margin: min(4vh, 30px) auto;
+    overflow-y: auto;
+    border-radius: 22px;
+    border: 1px solid #ced4db;
+    background: #e8edf3;
+    box-shadow: 0 24px 50px rgba(6, 16, 24, 0.35);
+    padding: 24px 26px 28px;
+}
+
+.team-modal-close {
+    position: absolute;
+    right: 14px;
+    top: 14px;
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: 1px solid #b3bec8;
+    background: #f4f7fb;
+    color: #39434d;
+    display: grid;
+    place-items: center;
+    font-size: 1rem;
+    padding: 0;
+}
+
+.team-modal-close:hover {
+    background: #eaf0f6;
+}
+
+.team-modal-header h2 {
+    margin: 0;
+    font-size: clamp(2rem, 4.2vw, 3.95rem);
+    line-height: 0.98;
+    color: #0a0e13;
+    letter-spacing: -0.02em;
+}
+
+.team-modal-header p {
+    margin: 6px 0 0;
+    font-size: clamp(1.05rem, 1.6vw, 2rem);
+    line-height: 1.05;
+    color: #59626e;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.team-grid {
+    margin-top: 22px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 18px;
+}
+
+.team-card {
+    text-align: center;
+}
+
+.team-photo {
+    width: 100%;
+    aspect-ratio: 4 / 5.2;
+    border-radius: 50px;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 16px;
+}
+
+.team-photo::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
+.team-photo img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: none;
+    z-index: 1;
+}
+
+.team-photo.has-image img {
+    display: block;
+}
+
+.team-photo.has-image span {
+    display: none;
+}
+
+.team-photo span {
+    position: relative;
+    z-index: 2;
+    min-width: 56px;
+    height: 34px;
+    padding: 0 12px;
+    border-radius: 999px;
+    background: rgba(22, 30, 40, 0.55);
+    color: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.team-photo.theme-1::before {
+    background:
+        radial-gradient(circle at 35% 22%, rgba(255, 255, 255, 0.23), transparent 38%),
+        linear-gradient(168deg, #1f2a3a 0%, #31445f 46%, #1d2533 100%);
+}
+
+.team-photo.theme-2::before {
+    background:
+        radial-gradient(circle at 56% 16%, rgba(255, 255, 255, 0.21), transparent 42%),
+        linear-gradient(168deg, #313131 0%, #535353 42%, #242a38 100%);
+}
+
+.team-photo.theme-3::before {
+    background:
+        radial-gradient(circle at 48% 18%, rgba(255, 255, 255, 0.25), transparent 42%),
+        linear-gradient(170deg, #99a4b6 0%, #c4ceda 46%, #a2adbd 100%);
+}
+
+.team-photo.theme-4::before {
+    background:
+        radial-gradient(circle at 56% 17%, rgba(255, 255, 255, 0.22), transparent 40%),
+        linear-gradient(170deg, #8395b2 0%, #a7b6cf 43%, #73829e 100%);
+}
+
+.team-photo.theme-5::before {
+    background:
+        radial-gradient(circle at 44% 18%, rgba(255, 255, 255, 0.24), transparent 40%),
+        linear-gradient(170deg, #7d8f7c 0%, #a1b19f 44%, #6d7e6d 100%);
+}
+
+.team-card h3 {
+    margin: 12px 0 2px;
+    font-size: clamp(1rem, 1.9vw, 1.45rem);
+    line-height: 1.2;
+    text-wrap: balance;
+    color: #10161d;
+}
+
+.team-card p {
+    margin: 0;
+    color: #727b86;
+    font-size: 0.95rem;
 }
 
 .btn-logout {
@@ -347,6 +574,55 @@ a {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
+}
+
+body.login-page.login-demo-popup-open {
+    overflow: hidden;
+}
+
+.login-demo-popup {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    display: none;
+}
+
+.login-demo-popup.is-open {
+    display: block;
+}
+
+.login-demo-popup-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 19, 28, 0.48);
+}
+
+.login-demo-popup-panel {
+    position: relative;
+    width: min(420px, 92vw);
+    margin: 16vh auto 0;
+    background: #fff;
+    border: 1px solid #d5d8de;
+    border-radius: 16px;
+    padding: 18px 18px 16px;
+    box-shadow: 0 22px 38px rgba(10, 19, 28, 0.28);
+}
+
+.login-demo-popup-panel h2 {
+    margin: 0;
+    font-size: 1.2rem;
+    color: #1f2b3a;
+}
+
+.login-demo-popup-panel p {
+    margin: 8px 0 0;
+    color: #4f5d6f;
+    font-size: 0.98rem;
+}
+
+.login-demo-popup-btn {
+    margin-top: 14px;
+    width: 100%;
 }
 
 .panel {
@@ -673,6 +949,18 @@ th {
     border: 1px solid rgba(40, 90, 72, 0.2);
 }
 
+@media (min-width: 921px) {
+    .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+    }
+
+    .sidebar nav {
+        overflow-y: auto;
+    }
+}
+
 @media (max-width: 1060px) {
     .stats-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -717,7 +1005,7 @@ th {
 
     .sidebar-footer {
         margin-top: 0;
-        padding-top: 10px;
+        padding-top: 0;
     }
 
     .sidebar-footer .topbar-user {
@@ -753,6 +1041,23 @@ th {
     .stats-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
+
+    .team-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .team-modal-panel {
+        width: min(980px, 94vw);
+        padding: 20px 16px 22px;
+    }
+
+    .team-modal-header h2 {
+        font-size: clamp(1.7rem, 8.2vw, 2.6rem);
+    }
+
+    .team-modal-header p {
+        font-size: clamp(1.02rem, 5.4vw, 1.6rem);
+    }
 }
 
 @media (max-width: 560px) {
@@ -769,6 +1074,38 @@ th {
 
     .nav-link {
         min-height: 54px;
+    }
+
+    .sidebar-quick-buttons {
+        gap: 6px;
+    }
+
+    .quick-btn {
+        min-height: 76px;
+        border-radius: 18px;
+        font-size: 0.64rem;
+    }
+
+    .quick-btn i {
+        font-size: 1.1rem;
+    }
+
+    .team-grid {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    .team-photo {
+        max-width: 320px;
+        margin: 0 auto;
+    }
+
+    .team-card h3 {
+        font-size: 1.15rem;
+    }
+
+    .team-card p {
+        font-size: 0.88rem;
     }
 
     .login-hero {
@@ -797,7 +1134,7 @@ th {
         font-size: clamp(0.8rem, 3.9vw, 1rem);
     }
 
-    body {
+    body.login-page {
         padding-bottom: 36px;
     }
 

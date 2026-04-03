@@ -1,0 +1,89 @@
+{% load static %}
+
+<div id="team-modal" class="team-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="team-modal-title">
+    <div class="team-modal-backdrop" data-team-close></div>
+    <section class="team-modal-panel" role="document">
+        <button type="button" class="team-modal-close" aria-label="Close team popup" data-team-close>
+            <i class="fa-solid fa-xmark" aria-hidden="true"></i>
+        </button>
+
+        <header class="team-modal-header">
+            <h2 id="team-modal-title">ทีมผู้จัดทำ</h2>
+            <p>SPU Medbay. ICT12267 | ICT12367</p>
+        </header>
+
+        <div class="team-grid">
+            <article class="team-card">
+                <div class="team-photo theme-1 has-image">
+                    <img src="https://staffscms.spu.ac.th/empstd_pic.cfm?type=STD&id=68016626" alt="Kaiya Rhiel Madsen" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.remove('has-image');">
+                </div>
+                <h3>เจตนิพัทธ์ อุตมกูล</h3>
+                <p>Lorem.</p>
+            </article>
+            <article class="team-card">
+                <div class="team-photo theme-2 has-image">
+                    <img src="https://staffscms.spu.ac.th/empstd_pic.cfm?type=STD&id=68021656" alt="Charlie Stanton" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.remove('has-image');">
+                </div>
+                <h3>กฤตพรรธ จิตตรีงาม</h3>
+                <p>Lorem.</p>
+            </article>
+            <article class="team-card">
+                <div class="team-photo theme-3 has-image">
+                    <img src="https://staffscms.spu.ac.th/empstd_pic.cfm?type=STD&id=68048166" alt="Makenna Kenter" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.remove('has-image');">
+                </div>
+                <h3>กันตพัชร ไหมเหลือง</h3>
+                <p>Lorem.</p>
+            </article>
+            <article class="team-card">
+                <div class="team-photo theme-4 has-image">
+                    <img src="https://staffscms.spu.ac.th/empstd_pic.cfm?type=STD&id=68049469" alt="Angel Mango" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.remove('has-image');">
+                </div>
+                <h3>ชคดี โพธิสัมฤทธิ์</h3>
+                <p>Lorem.</p>
+            </article>
+            <article class="team-card">
+                <div class="team-photo theme-5 has-image">
+                    <img src="https://staffscms.spu.ac.th/empstd_pic.cfm?type=STD&id=68091301" alt="Noah Reed" loading="lazy" onerror="this.style.display='none'; this.parentElement.classList.remove('has-image');">
+                </div>
+                <h3>อนุวัตร พิสุทธิ์ไพศาล</h3>
+                <p>Lorem.</p>
+            </article>
+        </div>
+    </section>
+</div>
+
+<script>
+(function () {
+    const trigger = document.getElementById('team-popup-trigger');
+    const modal = document.getElementById('team-modal');
+    if (!trigger || !modal) {
+        return;
+    }
+
+    const closeTargets = modal.querySelectorAll('[data-team-close]');
+
+    function openModal() {
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('team-modal-open');
+    }
+
+    function closeModal() {
+        modal.classList.remove('is-open');
+        modal.setAttribute('aria-hidden', 'true');
+        document.body.classList.remove('team-modal-open');
+    }
+
+    trigger.addEventListener('click', openModal);
+
+    closeTargets.forEach(function (item) {
+        item.addEventListener('click', closeModal);
+    });
+
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Escape' && modal.classList.contains('is-open')) {
+            closeModal();
+        }
+    });
+})();
+</script>

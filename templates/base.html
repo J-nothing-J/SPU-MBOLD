@@ -15,7 +15,7 @@
             <div class="brand-block">
                 <div class="brand-row">
                     <div class="brand">SP<span class="brand-u">U</span> Medbay</div>
-                    <span class="brand-version" aria-label="Version 0.2.069">v0.2.069</span>
+                    <span class="brand-version" aria-label="Version 0.5.420">v0.5.420</span>
                 </div>
                 <div class="brand-campus">Campus: Bang Khen</div>
             </div>
@@ -53,6 +53,20 @@
             </nav>
 
             <div class="sidebar-footer">
+                <div class="sidebar-quick-buttons" aria-label="Quick shortcuts">
+                    <a href="{% url 'dashboard' %}" class="quick-btn {% if request.path == '/dashboard/' %}active{% endif %}">
+                        <i class="fa-solid fa-star" aria-hidden="true"></i>
+                        <span>DASH</span>
+                    </a>
+                    <a href="{% url 'new_case' %}" class="quick-btn {% if request.path == '/new-case/' %}active{% endif %}">
+                        <i class="fa-solid fa-star" aria-hidden="true"></i>
+                        <span>CASE</span>
+                    </a>
+                    <button type="button" id="team-popup-trigger" class="quick-btn quick-btn-team" aria-haspopup="dialog" aria-controls="team-modal">
+                        <i class="fa-solid fa-users-rays" aria-hidden="true"></i>
+                        <span>TEAM</span>
+                    </button>
+                </div>
                 <div class="topbar-user">
                     <span>{{ user.get_full_name|default:user.username }}</span>
                     <span class="badge">{{ user.role }}</span>
@@ -79,6 +93,8 @@
             {% block content %}{% endblock %}
         </main>
     </div>
+
+    {% include 'clinic/team_popup.html' %}
     {% else %}
     <main class="auth-wrapper">
         {% if messages %}
@@ -93,7 +109,7 @@
     {% endif %}
 
     {% if not user.is_authenticated and request.path == '/login/' %}
-    <div class="app-version-number" role="contentinfo" aria-label="Current version 0.2.069">0.2.069</div>
+    <div class="app-version-number" role="contentinfo" aria-label="Current version 0.5.420">0.5.420</div>
     {% endif %}
 </body>
 </html>
