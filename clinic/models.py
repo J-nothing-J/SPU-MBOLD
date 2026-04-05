@@ -4,6 +4,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
+from simple_history.models import HistoricalRecords
 
 
 def generate_case_id() -> str:
@@ -31,6 +32,7 @@ class AppUser(AbstractUser):
 
 	role = models.CharField(max_length=16, choices=Role.choices, default=Role.NURSE)
 	status = models.CharField(max_length=16, choices=Status.choices, default=Status.ACTIVE)
+	history = HistoricalRecords()
 
 	def __str__(self) -> str:
 		return self.get_full_name() or self.username
@@ -51,6 +53,7 @@ class Patient(TimeStampedModel):
 	name = models.CharField(max_length=200)
 	organization = models.CharField(max_length=200)
 	gender = models.CharField(max_length=16, choices=Gender.choices)
+	history = HistoricalRecords()
 
 	@staticmethod
 	def detect_id_type(student_id: str) -> str:
@@ -87,6 +90,7 @@ class Medicine(TimeStampedModel):
 	category = models.CharField(max_length=100)
 	unit = models.CharField(max_length=32)
 	stock = models.PositiveIntegerField(default=0)
+	history = HistoricalRecords()
 
 	def __str__(self) -> str:
 		return f'{self.name} ({self.stock})'
@@ -116,6 +120,7 @@ class Bed(TimeStampedModel):
 	)
 	admission_date = models.DateTimeField(null=True, blank=True)
 	notes = models.TextField(blank=True)
+	history = HistoricalRecords()
 
 	class Meta:
 		ordering = ['room', 'number']
@@ -155,6 +160,7 @@ class Case(TimeStampedModel):
 	)
 	needs_ward = models.BooleanField(default=False)
 	status = models.CharField(max_length=16, choices=Status.choices, default=Status.ACTIVE)
+	history = HistoricalRecords()
 
 	class Meta:
 		ordering = ['-occurred_at']

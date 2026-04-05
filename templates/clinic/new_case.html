@@ -14,10 +14,15 @@
         <div class="message error">{{ form.non_field_errors|join:', ' }}</div>
         {% endif %}
 
-        <div class="form-grid two-col">
+        <div class="form-grid two-col" style="align-items: start;">
             <label>
                 {{ form.student_id.label }}
-                {{ form.student_id }}
+                <div style="display: flex; gap: 8px;">
+                    {{ form.student_id }}
+                    <button type="button" id="search-patient-btn" class="btn btn-secondary" style="flex-shrink: 0; padding: 4px 12px; height: 38px;" title="ค้นหาประวัติ">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
                 <div class="id-type-indicator" aria-live="polite">
                     <label class="id-type-flag">
                         <input type="checkbox" id="id-type-student-flag" disabled>
@@ -257,6 +262,48 @@
 
     idInput.addEventListener('input', updateIndicatorAndSelect);
     updateIndicatorAndSelect();
+
+    const searchBtn = document.getElementById('search-patient-btn');
+    const nameInput = document.getElementById('id_name');
+    const genderSelect = document.getElementById('id_gender');
+
+    if (searchBtn && nameInput && genderSelect) {
+        searchBtn.addEventListener('click', () => {
+            const val = idInput.value;
+            if (!val || val.length < 7) {
+                alert('กรุณากรอกรหัส 7 หรือ 8 หลักให้ครบถ้วนก่อนค้นหา');
+                return;
+            }
+            
+            searchBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            searchBtn.disabled = true;
+
+            fetch(`/api/patients/${val}/`)
+                .then(res => {
+                    if (!res.ok) throw new Error('Not found');
+                    return res.json();
+                })
+                .then(data => {
+                    nameInput.value = data.name || '';
+                    genderSelect.value = data.gender || '';
+                    // First we ensure the organization options are correctly populated for this type of ID
+                    updateOrgOptions(detectIdType(val));
+                    // Then we can set the organization value
+                    organizationSelect.value = data.organization || '';
+                    
+                    // Simple small notification or alert
+                    alert('พบข้อมูลผู้ป่วยเดิม ระบบได้เติมข้อมูลอัตโนมัติแล้ว');
+                })
+                .catch(err => {
+                    alert('ไม่พบข้อมูลผู้ป่วย หรือเป็นผู้ป่วยใหม่ (กรุณากรอกข้อมูลเพิ่ม)');
+                })
+                .finally(() => {
+                    searchBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>';
+                    searchBtn.disabled = false;
+                });
+        });
+    }
+
 })();
 </script>
 {% endblock %}

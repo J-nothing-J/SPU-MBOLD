@@ -1,12 +1,15 @@
 from __future__ import annotations
 
 import datetime
+from itertools import chain
+from operator import attrgetter
 from urllib.parse import urlencode
 
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 from django.db.models import Count, Prefetch, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -391,13 +394,25 @@ def inventory_view(request):
 
 @login_required
 def beds_view(request):
+	def split_beds_for_layout(bed_list):
+		midpoint = (len(bed_list) + 1) // 2
+		return {
+			'top': bed_list[:midpoint],
+			'bottom': bed_list[midpoint:],
+		}
+
 	bed_form = BedForm()
 	edit_bed = None
+	is_admin = _is_active_admin(request.user)
 
 	if request.method == 'POST':
 		action = (request.POST.get('action') or '').strip()
 
 		if action == 'save_bed':
+			if not is_admin:
+				messages.error(request, 'เฉพาะผู้ดูแลระบบเท่านั้นที่เพิ่มหรือแก้ไขเตียงได้')
+				return redirect('beds')
+
 			edit_id = (request.POST.get('edit_id') or '').strip()
 			edit_bed = Bed.objects.filter(pk=edit_id).first() if edit_id else None
 			bed_form = BedForm(request.POST, instance=edit_bed)
@@ -451,6 +466,10 @@ def beds_view(request):
 			return redirect('beds')
 
 		elif action == 'delete_bed':
+			if not is_admin:
+				messages.error(request, 'เฉพาะผู้ดูแลระบบเท่านั้นที่ลบเตียงได้')
+				return redirect('beds')
+
 			bed_id = (request.POST.get('bed_id') or '').strip()
 			bed_obj = get_object_or_404(Bed, pk=bed_id)
 			if bed_obj.status == Bed.Status.OCCUPIED:
@@ -463,16 +482,35 @@ def beds_view(request):
 	else:
 		edit_id = (request.GET.get('edit') or '').strip()
 		if edit_id:
+			if not is_admin:
+				messages.error(request, 'เฉพาะผู้ดูแลระบบเท่านั้นที่แก้ไขข้อมูลเตียงได้')
+				return redirect('beds')
+
 			edit_bed = Bed.objects.filter(pk=edit_id).first()
 			if edit_bed:
 				bed_form = BedForm(instance=edit_bed)
 			else:
 				messages.error(request, 'ไม่พบเตียงที่ต้องการแก้ไข')
 
+	beds = list(Bed.objects.select_related('patient').order_by('room', 'number'))
+	male_beds = [bed for bed in beds if bed.gender_rule == Bed.GenderRule.MALE]
+	female_beds = [bed for bed in beds if bed.gender_rule == Bed.GenderRule.FEMALE]
+	unisex_beds = [bed for bed in beds if bed.gender_rule == Bed.GenderRule.ANY]
+
 	context = {
 		'bed_form': bed_form,
 		'edit_bed': edit_bed,
-		'beds': Bed.objects.select_related('patient').order_by('room', 'number'),
+		'beds': beds,
+		'male_ward': split_beds_for_layout(male_beds),
+		'female_ward': split_beds_for_layout(female_beds),
+		'unisex_beds': unisex_beds,
+		'male_bed_count': len(male_beds),
+		'female_bed_count': len(female_beds),
+		'unisex_bed_count': len(unisex_beds),
+		'male_occupied_count': sum(1 for bed in male_beds if bed.status == Bed.Status.OCCUPIED),
+		'female_occupied_count': sum(1 for bed in female_beds if bed.status == Bed.Status.OCCUPIED),
+		'unisex_occupied_count': sum(1 for bed in unisex_beds if bed.status == Bed.Status.OCCUPIED),
+		'is_admin': is_admin,
 		'patients': Patient.objects.order_by('student_id'),
 	}
 	return render(request, 'clinic/beds.html', context)
@@ -545,3 +583,42 @@ def user_management_view(request):
 		'users': AppUser.objects.order_by('role', 'username'),
 	}
 	return render(request, 'clinic/users.html', context)
+
+@login_required
+def api_get_patient(request, student_id):
+	try:
+		patient = Patient.objects.get(student_id=student_id)
+		data = {
+			'name': patient.name,
+			'organization': patient.organization,
+			'gender': patient.gender,
+		}
+		return JsonResponse(data)
+	except Patient.DoesNotExist:
+		return JsonResponse({'error': 'Patient not found'}, status=404)
+@user_passes_test(_is_active_admin)
+def audit_logs_view(request):
+	limit = 100
+	action_map = {'+': 'เพิ่มข้อมูล', '~': 'แก้ไขข้อมูล', '-': 'ลบข้อมูล'}
+
+	def _prepare(qs, model_verbose):
+		logs = list(qs)
+		for log in logs:
+			log.model_name = model_verbose
+			log.action_label = action_map.get(log.history_type, log.history_type)
+			log.target_display = str(log.instance) if hasattr(log, 'instance') and log.instance else f"{model_verbose} #{log.id if hasattr(log,'id') else ''}"
+		return logs
+
+	cases = _prepare(Case.history.select_related('history_user').all()[:limit], 'เคส (Case)')
+	patients = _prepare(Patient.history.select_related('history_user').all()[:limit], 'ผู้ป่วย (Patient)')
+	medicines = _prepare(Medicine.history.select_related('history_user').all()[:limit], 'ยา (Medicine)')
+	beds = _prepare(Bed.history.select_related('history_user').all()[:limit], 'เตียง (Bed)')
+	users = _prepare(AppUser.history.select_related('history_user').all()[:limit], 'ผู้ใช้ (User)')
+
+	all_logs = sorted(
+		chain(cases, patients, medicines, beds, users),
+		key=attrgetter('history_date'),
+		reverse=True
+	)[:limit]
+
+	return render(request, 'clinic/audit_logs.html', {'logs': all_logs})

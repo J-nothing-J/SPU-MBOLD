@@ -6,9 +6,24 @@
 <div id="login-demo-popup" class="login-demo-popup" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="login-demo-popup-title">
     <div class="login-demo-popup-backdrop" data-login-demo-close></div>
     <section class="login-demo-popup-panel" role="document">
-        <h2 id="login-demo-popup-title">Notice</h2>
-        <p>This is demo website.</p>
-        <button type="button" class="btn btn-secondary login-demo-popup-btn" data-login-demo-close>OK</button>
+        <h2 id="login-demo-popup-title" style="margin-bottom: 12px; color: var(--brand-dark);">
+            <i class="fa-solid fa-circle-info"></i> DEMO MODE: ข้อมูลและการเข้าสู่ระบบสำหรับทดสอบ
+        </h2>
+        <div style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px;">
+            <p>ยินดีต้อนรับสู่ระบบจัดการห้องพยาบาลจำลอง <strong>SPU Medbay</strong></p>
+            <p class="muted" style="margin-bottom: 16px;">ข้อมูลในระบบนี้เป็นข้อมูลสมมติสำหรับการทดสอบเท่านั้น โปรดอย่ากรอกข้อมูลส่วนบุคคลหรือข้อมูลผู้ป่วยจริง</p>
+            
+            <h3 style="font-size: 0.95rem; color: var(--text);">📝 วิธีเข้าสู่ระบบเบื้องต้น</h3>
+            <ul style="margin-top: 8px; padding-left: 20px;">
+                <li style="margin-bottom: 8px;"><strong>พยาบาล:</strong> กดเลือกชื่อพยาบาลด้านล่างเพื่อเข้าสู่ระบบได้ทันที</li>
+                <li><strong>ผู้ดูแลระบบ (Admin Role):</strong> 
+                    <br>ใช้งานเมนู <i>จัดการผู้ใช้</i> และ <i>ประวัติการใช้งาน</i>
+                    <br>ชื่อผู้ใช้: <code style="background: #f1f3f5; padding: 2px 6px; border-radius: 4px;">admin</code> 
+                    <br>รหัสผ่าน: <code style="background: #f1f3f5; padding: 2px 6px; border-radius: 4px;">admin1234</code>
+                </li>
+            </ul>
+        </div>
+        <button type="button" class="btn btn-primary login-demo-popup-btn" data-login-demo-close>รับทราบ และเข้าสู่ระบบทดสอบ (Enter Demo)</button>
     </section>
 </div>
 
@@ -65,8 +80,13 @@
             </form>
         </article>
     </div>
-
+    
+    <button type="button" id="team-popup-trigger" class="team-modal-tagline" style="background: none; border: none; padding: 12px 0 0 0; cursor: pointer; width: 100%; display: block; border-top: 1px solid rgba(16, 22, 31, 0.14); margin-top: 32px; font-family: inherit;">
+        Cooking with 💜 by SPU:SIT_ICT Students
+    </button>
 </section>
+
+{% include 'clinic/team_popup.html' %}
 
 <script>
 (function () {

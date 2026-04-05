@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}ประวัติการใช้งาน | SPU Medbay{% endblock %}
+
+{% block content %}
+<section class="panel">
+    <h1>ประวัติการใช้งานระบบ (Audit Trail)</h1>
+    <p class="muted">รายการความเคลื่อนไหวล่าสุดในระบบ (แสดง 100 รายการล่าสุด)</p>
+
+    <div class="table-responsive" style="margin-top: 16px;">
+        <table>
+            <thead>
+                <tr>
+                    <th>วัน/เวลา</th>
+                    <th>ผู้ใช้งาน</th>
+                    <th>การกระทำ</th>
+                    <th>ข้อมูล/โมดูล</th>
+                    <th>รายละเอียด</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td class="muted">{{ log.history_date|date:"Y-m-d H:i:s" }}</td>
+                    <td>
+                        {% if log.history_user %}
+                            {{ log.history_user.get_full_name|default:log.history_user.username }}
+                        {% else %}
+                            <span class="muted">System / Unknown</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if log.history_type == '+' %}
+                            <span class="status-pill status-active" style="background:#e7f1ed; color:#244f3f;">{{ log.action_label }}</span>
+                        {% elif log.history_type == '~' %}
+                            <span class="status-pill status-occupied" style="background:#fcf1da; color:#a16e0c;">{{ log.action_label }}</span>
+                        {% elif log.history_type == '-' %}
+                            <span class="status-pill" style="background:#f9e4e4; color:#792f2f;">{{ log.action_label }}</span>
+                        {% else %}
+                            <span class="status-pill">{{ log.action_label }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ log.model_name }}</td>
+                    <td>{{ log.target_display }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="5" style="text-align: center;" class="muted">ยังไม่มีประวัติการใช้งาน</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

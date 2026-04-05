@@ -213,6 +213,70 @@ body.team-modal-open {
     display: block;
 }
 
+.team-modal.is-open .team-modal-backdrop {
+    animation: teamModalBackdropIn 220ms ease-out both;
+}
+
+.team-modal.is-open .team-modal-panel {
+    animation: teamModalPanelIn 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    transform-origin: top center;
+}
+
+.team-modal.is-open .team-card {
+    animation: teamModalCardIn 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.team-modal.is-open .team-card:nth-child(1) {
+    animation-delay: 70ms;
+}
+
+.team-modal.is-open .team-card:nth-child(2) {
+    animation-delay: 120ms;
+}
+
+.team-modal.is-open .team-card:nth-child(3) {
+    animation-delay: 170ms;
+}
+
+.team-modal.is-open .team-card:nth-child(4) {
+    animation-delay: 220ms;
+}
+
+.team-modal.is-open .team-card:nth-child(5) {
+    animation-delay: 270ms;
+}
+
+@keyframes teamModalBackdropIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes teamModalPanelIn {
+    from {
+        opacity: 0;
+        transform: translateY(18px) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes teamModalCardIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .team-modal-backdrop {
     position: absolute;
     inset: 0;
@@ -301,6 +365,7 @@ body.team-modal-open {
 
 .team-photo img {
     position: absolute;
+    object-position: top center;
     inset: 0;
     width: 100%;
     height: 100%;
@@ -376,6 +441,17 @@ body.team-modal-open {
     margin: 0;
     color: #727b86;
     font-size: 0.95rem;
+}
+
+.team-modal-tagline {
+    margin-top: 16px;
+    padding-top: 12px;
+    border-top: 1px solid rgba(16, 22, 31, 0.14);
+    text-align: center;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: #5d6673;
 }
 
 .btn-logout {
@@ -922,10 +998,333 @@ th {
     background: #f1cfcf;
 }
 
+.status-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+}
+
+.status-pill.available {
+    background: #e9f4ee;
+    color: #29513f;
+}
+
+.status-pill.occupied {
+    background: #ffe8e8;
+    color: #8b3434;
+}
+
 .split-grid {
     display: grid;
     gap: 14px;
     grid-template-columns: 360px 1fr;
+}
+
+.beds-layout-grid {
+    align-items: start;
+}
+
+.beds-layout-grid--viewer {
+    grid-template-columns: 1fr;
+}
+
+.beds-layout-column {
+    display: grid;
+    gap: 14px;
+}
+
+.bed-map-panel {
+    overflow: hidden;
+}
+
+.ward-stat-chips {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.ward-chip {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    border: 1px solid #c8d4cd;
+    background: #edf4f0;
+    color: #2d4f42;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 4px 10px;
+}
+
+.ward-layout {
+    margin-top: 10px;
+    border: 6px solid #cbcbce;
+    border-radius: 8px;
+    background: #efeff1;
+    padding: 12px 10px 8px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 170px minmax(0, 1fr);
+    grid-template-rows: auto 1fr auto;
+    gap: 10px 12px;
+    position: relative;
+}
+
+.ward-bed-zone {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px;
+    min-height: 104px;
+}
+
+.ward-bed-zone-left {
+    grid-column: 1;
+}
+
+.ward-bed-zone-right {
+    grid-column: 3;
+}
+
+.ward-bed-zone-top {
+    grid-row: 1;
+}
+
+.ward-bed-zone-bottom {
+    grid-row: 3;
+}
+
+.ward-bed,
+.ward-bed-empty {
+    width: 56px;
+    min-height: 132px;
+    border-radius: 3px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 4px 6px;
+    position: relative;
+}
+
+.ward-bed {
+    border: 1px solid #b4b4b8;
+    color: #191e24;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.ward-bed:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 16px rgba(10, 18, 26, 0.15);
+}
+
+.ward-bed::after {
+    content: "";
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: #6f8078;
+}
+
+.ward-bed-available {
+    background: #d0d1d4;
+}
+
+.ward-bed-occupied {
+    background: #ffd8d8;
+    border-color: #ca9a9a;
+}
+
+.ward-bed-occupied::after {
+    background: #b63a3a;
+}
+
+.ward-bed-word {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    font-size: 0.9rem;
+}
+
+.ward-bed-meta {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    line-height: 1.2;
+    text-align: center;
+    word-break: break-word;
+}
+
+.ward-bed-empty {
+    border: 1px dashed #b7b9be;
+    color: #9ba2a9;
+    background: #f4f5f7;
+    font-weight: 600;
+    justify-content: center;
+}
+
+.ward-title {
+    align-self: center;
+    justify-self: center;
+    font-size: clamp(1.15rem, 2.1vw, 2rem);
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #101317;
+}
+
+.ward-title-left {
+    grid-column: 1;
+    grid-row: 2;
+}
+
+.ward-title-right {
+    grid-column: 3;
+    grid-row: 2;
+}
+
+.ward-wall {
+    grid-column: 2;
+    grid-row: 1 / 4;
+    justify-self: center;
+    align-self: stretch;
+    width: 38px;
+    border: 1px solid #988186;
+    background: #c2afb4;
+    color: #2d2527;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    z-index: 2;
+}
+
+.ward-toilets {
+    grid-column: 2;
+    grid-row: 1;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-self: start;
+    z-index: 1;
+}
+
+.ward-toilet {
+    min-height: 86px;
+    border: 1px solid #7ea8a7;
+    background: #96c0be;
+    color: #1a2128;
+    display: grid;
+    place-items: center;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+}
+
+.ward-doors {
+    grid-column: 2;
+    grid-row: 3;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    align-self: end;
+    z-index: 1;
+}
+
+.ward-door {
+    display: grid;
+    justify-items: center;
+    gap: 6px;
+}
+
+.ward-door::before {
+    content: "";
+    width: 100%;
+    max-width: 68px;
+    height: 10px;
+    border-radius: 2px;
+    background: #d17a3e;
+}
+
+.ward-door span {
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+
+.ward-legend {
+    margin-top: 12px;
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    color: var(--muted);
+    font-size: 0.84rem;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.legend-swatch {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    border: 1px solid #acb1b6;
+}
+
+.legend-swatch.available {
+    background: #d0d1d4;
+}
+
+.legend-swatch.occupied {
+    background: #ffd8d8;
+    border-color: #ca9a9a;
+}
+
+.legend-swatch.any {
+    background: #fff4ca;
+    border-color: #cfb86e;
+}
+
+.neutral-bed-grid {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.neutral-bed-card {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: #fffdf8;
+    padding: 10px;
+    display: grid;
+    gap: 7px;
+}
+
+.neutral-bed-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.neutral-bed-card p {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.86rem;
 }
 
 .row-warning {
@@ -968,6 +1367,10 @@ th {
 
     .split-grid {
         grid-template-columns: 1fr;
+    }
+
+    .ward-layout {
+        grid-template-columns: minmax(0, 1fr) 150px minmax(0, 1fr);
     }
 }
 
@@ -1051,6 +1454,42 @@ th {
         padding: 20px 16px 22px;
     }
 
+    .ward-layout {
+        grid-template-columns: minmax(0, 1fr) 124px minmax(0, 1fr);
+        gap: 8px;
+    }
+
+    .ward-wall {
+        width: 30px;
+    }
+
+    .ward-toilet {
+        min-height: 70px;
+        font-size: 0.76rem;
+    }
+
+    .ward-bed,
+    .ward-bed-empty {
+        width: 44px;
+        min-height: 112px;
+    }
+
+    .ward-bed-word {
+        font-size: 0.76rem;
+    }
+
+    .ward-bed-meta {
+        font-size: 0.58rem;
+    }
+
+    .ward-title {
+        font-size: clamp(1rem, 3.8vw, 1.4rem);
+    }
+
+    .ward-chip {
+        font-size: 0.72rem;
+    }
+
     .team-modal-header h2 {
         font-size: clamp(1.7rem, 8.2vw, 2.6rem);
     }
@@ -1090,6 +1529,18 @@ th {
         font-size: 1.1rem;
     }
 
+    .bed-map-panel {
+        overflow-x: auto;
+    }
+
+    .ward-layout {
+        min-width: 640px;
+    }
+
+    .ward-stat-chips {
+        justify-content: flex-start;
+    }
+
     .team-grid {
         grid-template-columns: 1fr;
         gap: 14px;
@@ -1106,6 +1557,11 @@ th {
 
     .team-card p {
         font-size: 0.88rem;
+    }
+
+    .team-modal-tagline {
+        margin-top: 12px;
+        font-size: 0.84rem;
     }
 
     .login-hero {
@@ -1143,5 +1599,13 @@ th {
         bottom: 7px;
         font-size: 0.7rem;
         padding: 3px 5px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .team-modal.is-open .team-modal-backdrop,
+    .team-modal.is-open .team-modal-panel,
+    .team-modal.is-open .team-card {
+        animation: none;
     }
 }

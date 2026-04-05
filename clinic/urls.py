@@ -17,4 +17,6 @@ urlpatterns = [
     path('inventory/', views.inventory_view, name='inventory'),
     path('beds/', views.beds_view, name='beds'),
     path('users/', views.user_management_view, name='user_management'),
+    path('api/patients/<str:student_id>/', views.api_get_patient, name='api_get_patient'),
+    path('audit-logs/', views.audit_logs_view, name='audit_logs'),
 ]

@@ -3,7 +3,8 @@
 {% block title %}จัดการเตียง | SPU Medbay{% endblock %}
 
 {% block content %}
-<section class="split-grid">
+<section class="split-grid beds-layout-grid{% if not is_admin %} beds-layout-grid--viewer{% endif %}">
+    {% if is_admin %}
     <article class="panel">
         <h1>{% if edit_bed %}แก้ไขเตียง{% else %}เพิ่มเตียงใหม่{% endif %}</h1>
 
@@ -45,75 +46,198 @@
             </div>
         </form>
     </article>
+    {% endif %}
 
-    <article class="panel">
-        <h2>สถานะเตียง</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>รหัสเตียง</th>
-                    <th>ห้อง/หมายเลข</th>
-                    <th>ข้อกำหนดเพศ</th>
-                    <th>สถานะ</th>
-                    <th>ผู้ป่วย</th>
-                    <th>จัดการ</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for bed in beds %}
-                <tr>
-                    <td>{{ bed.id }}</td>
-                    <td>{{ bed.room }} / {{ bed.number }}</td>
-                    <td>{{ bed.gender_rule }}</td>
-                    <td>{{ bed.status }}</td>
-                    <td>
+    <div class="beds-layout-column">
+        <article class="panel bed-map-panel">
+            <div class="section-head">
+                <h2>แผนผังหอผู้ป่วย</h2>
+                <div class="ward-stat-chips">
+                    <span class="ward-chip">ชาย {{ male_occupied_count }}/{{ male_bed_count }}</span>
+                    <span class="ward-chip">หญิง {{ female_occupied_count }}/{{ female_bed_count }}</span>
+                    {% if unisex_bed_count %}
+                    <span class="ward-chip">Any {{ unisex_occupied_count }}/{{ unisex_bed_count }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="ward-layout" role="img" aria-label="แผนผังหอผู้ป่วยแยกชายและหญิงพร้อมห้องน้ำ กำแพง และประตู">
+                <div class="ward-wall">WALL</div>
+
+                <div class="ward-toilets">
+                    <div class="ward-toilet">TOILET</div>
+                    <div class="ward-toilet">TOILET</div>
+                </div>
+
+                <div class="ward-bed-zone ward-bed-zone-left ward-bed-zone-top">
+                    {% for bed in male_ward.top %}
+                    <a class="ward-bed ward-bed-{{ bed.status }}" href="{% url 'beds' %}?edit={{ bed.id }}" title="{% if bed.patient %}{{ bed.id }} | {{ bed.patient.student_id }} - {{ bed.patient.name }}{% else %}{{ bed.id }} | เตียงว่าง{% endif %}">
+                        <span class="ward-bed-word">BED</span>
+                        <span class="ward-bed-meta">{{ bed.id }}</span>
+                    </a>
+                    {% empty %}
+                    <div class="ward-bed-empty">-</div>
+                    {% endfor %}
+                </div>
+
+                <div class="ward-bed-zone ward-bed-zone-right ward-bed-zone-top">
+                    {% for bed in female_ward.top %}
+                    <a class="ward-bed ward-bed-{{ bed.status }}" href="{% url 'beds' %}?edit={{ bed.id }}" title="{% if bed.patient %}{{ bed.id }} | {{ bed.patient.student_id }} - {{ bed.patient.name }}{% else %}{{ bed.id }} | เตียงว่าง{% endif %}">
+                        <span class="ward-bed-word">BED</span>
+                        <span class="ward-bed-meta">{{ bed.id }}</span>
+                    </a>
+                    {% empty %}
+                    <div class="ward-bed-empty">-</div>
+                    {% endfor %}
+                </div>
+
+                <div class="ward-title ward-title-left">MALE WARD</div>
+                <div class="ward-title ward-title-right">FEMALE WARD</div>
+
+                <div class="ward-bed-zone ward-bed-zone-left ward-bed-zone-bottom">
+                    {% for bed in male_ward.bottom %}
+                    <a class="ward-bed ward-bed-{{ bed.status }}" href="{% url 'beds' %}?edit={{ bed.id }}" title="{% if bed.patient %}{{ bed.id }} | {{ bed.patient.student_id }} - {{ bed.patient.name }}{% else %}{{ bed.id }} | เตียงว่าง{% endif %}">
+                        <span class="ward-bed-word">BED</span>
+                        <span class="ward-bed-meta">{{ bed.id }}</span>
+                    </a>
+                    {% empty %}
+                    <div class="ward-bed-empty">-</div>
+                    {% endfor %}
+                </div>
+
+                <div class="ward-bed-zone ward-bed-zone-right ward-bed-zone-bottom">
+                    {% for bed in female_ward.bottom %}
+                    <a class="ward-bed ward-bed-{{ bed.status }}" href="{% url 'beds' %}?edit={{ bed.id }}" title="{% if bed.patient %}{{ bed.id }} | {{ bed.patient.student_id }} - {{ bed.patient.name }}{% else %}{{ bed.id }} | เตียงว่าง{% endif %}">
+                        <span class="ward-bed-word">BED</span>
+                        <span class="ward-bed-meta">{{ bed.id }}</span>
+                    </a>
+                    {% empty %}
+                    <div class="ward-bed-empty">-</div>
+                    {% endfor %}
+                </div>
+
+                <div class="ward-doors">
+                    <div class="ward-door"><span>DOOR</span></div>
+                    <div class="ward-door"><span>DOOR</span></div>
+                </div>
+            </div>
+
+            <div class="ward-legend">
+                <span class="legend-item"><span class="legend-swatch available"></span> Available</span>
+                <span class="legend-item"><span class="legend-swatch occupied"></span> Occupied</span>
+                {% if unisex_bed_count %}
+                <span class="legend-item"><span class="legend-swatch any"></span> Any gender bed</span>
+                {% endif %}
+            </div>
+        </article>
+
+        {% if unisex_beds %}
+        <article class="panel">
+            <h3>เตียงที่ตั้งค่า Any</h3>
+            <div class="neutral-bed-grid">
+                {% for bed in unisex_beds %}
+                <div class="neutral-bed-card">
+                    <div class="neutral-bed-top">
+                        <strong>{{ bed.id }}</strong>
+                        <span class="status-pill {{ bed.status }}">{{ bed.get_status_display }}</span>
+                    </div>
+                    <p>ห้อง {{ bed.room }} / เตียง {{ bed.number }}</p>
+                    <p>
                         {% if bed.patient %}
                         {{ bed.patient.student_id }} - {{ bed.patient.name }}
                         {% else %}
-                        -
+                        ยังไม่มีผู้ป่วย
                         {% endif %}
-                    </td>
-                    <td>
-                        <div class="table-actions stack-actions">
-                            <a class="btn btn-secondary" href="{% url 'beds' %}?edit={{ bed.id }}">แก้ไขข้อมูล</a>
-
-                            {% if bed.status == 'available' %}
-                            <form method="post" class="stack-form compact-form">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="assign_bed">
-                                <input type="hidden" name="bed_id" value="{{ bed.id }}">
-                                <select name="patient_id" required>
-                                    <option value="">-- เลือกผู้ป่วย --</option>
-                                    {% for patient in patients %}
-                                    <option value="{{ patient.student_id }}">{{ patient.student_id }} - {{ patient.name }} ({{ patient.gender }})</option>
-                                    {% endfor %}
-                                </select>
-                                <input type="text" name="notes" placeholder="หมายเหตุ (ถ้ามี)">
-                                <button type="submit" class="btn btn-secondary">จัดเตียง</button>
-                            </form>
-                            {% else %}
-                            <form method="post" class="inline-form">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="discharge_bed">
-                                <input type="hidden" name="bed_id" value="{{ bed.id }}">
-                                <button type="submit" class="btn btn-secondary">จำหน่ายออกจากเตียง</button>
-                            </form>
-                            {% endif %}
-
-                            <form method="post" class="inline-form">
-                                {% csrf_token %}
-                                <input type="hidden" name="action" value="delete_bed">
-                                <input type="hidden" name="bed_id" value="{{ bed.id }}">
-                                <button type="submit" class="btn btn-secondary danger" onclick="return confirm('ยืนยันการลบเตียง {{ bed.id }} ?');">ลบเตียง</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                {% empty %}
-                <tr><td colspan="6">ยังไม่มีข้อมูลเตียง</td></tr>
+                    </p>
+                    {% if is_admin %}
+                    <a class="btn btn-secondary" href="{% url 'beds' %}?edit={{ bed.id }}">แก้ไขข้อมูล</a>
+                    {% endif %}
+                </div>
                 {% endfor %}
-            </tbody>
-        </table>
-    </article>
+            </div>
+        </article>
+        {% endif %}
+
+        <article class="panel">
+            <h2>สถานะเตียงและการจัดการ</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>รหัสเตียง</th>
+                        <th>ห้อง/หมายเลข</th>
+                        <th>ข้อกำหนดเพศ</th>
+                        <th>สถานะ</th>
+                        <th>ผู้ป่วย</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bed in beds %}
+                    <tr class="{% if bed.status == 'occupied' %}row-warning{% endif %}">
+                        <td>{{ bed.id }}</td>
+                        <td>{{ bed.room }} / {{ bed.number }}</td>
+                        <td>{{ bed.get_gender_rule_display }}</td>
+                        <td>
+                            <span class="status-pill {{ bed.status }}">{{ bed.get_status_display }}</span>
+                        </td>
+                        <td>
+                            {% if bed.patient %}
+                            {{ bed.patient.student_id }} - {{ bed.patient.name }}
+                            {% if bed.notes %}
+                            <div class="muted">หมายเหตุ: {{ bed.notes }}</div>
+                            {% endif %}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="table-actions stack-actions">
+                                {% if is_admin %}
+                                <a class="btn btn-secondary" href="{% url 'beds' %}?edit={{ bed.id }}">แก้ไขข้อมูล</a>
+                                {% endif %}
+
+                                {% if bed.status == 'available' %}
+                                <form method="post" class="stack-form compact-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="assign_bed">
+                                    <input type="hidden" name="bed_id" value="{{ bed.id }}">
+                                    <select name="patient_id" required>
+                                        <option value="">-- เลือกผู้ป่วย --</option>
+                                        {% for patient in patients %}
+                                        {% if bed.gender_rule == 'any' or patient.gender == bed.gender_rule %}
+                                        <option value="{{ patient.student_id }}">{{ patient.student_id }} - {{ patient.name }} ({{ patient.get_gender_display }})</option>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    <input type="text" name="notes" placeholder="หมายเหตุ (ถ้ามี)">
+                                    <button type="submit" class="btn btn-secondary">จัดเตียง</button>
+                                </form>
+                                {% else %}
+                                <form method="post" class="inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="discharge_bed">
+                                    <input type="hidden" name="bed_id" value="{{ bed.id }}">
+                                    <button type="submit" class="btn btn-secondary">จำหน่ายออกจากเตียง</button>
+                                </form>
+                                {% endif %}
+
+                                {% if is_admin %}
+                                <form method="post" class="inline-form">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_bed">
+                                    <input type="hidden" name="bed_id" value="{{ bed.id }}">
+                                    <button type="submit" class="btn btn-secondary danger" onclick="return confirm('ยืนยันการลบเตียง {{ bed.id }} ?');">ลบเตียง</button>
+                                </form>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6">ยังไม่มีข้อมูลเตียง</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </article>
+    </div>
 </section>
 {% endblock %}

@@ -15,7 +15,7 @@
             <div class="brand-block">
                 <div class="brand-row">
                     <div class="brand">SP<span class="brand-u">U</span> Medbay</div>
-                    <span class="brand-version" aria-label="Version 0.5.420">v0.5.420</span>
+                    <span class="brand-version" aria-label="Version 0.6.954">v0.6.954</span>
                 </div>
                 <div class="brand-campus">Campus: Bang Khen</div>
             </div>
@@ -49,6 +49,10 @@
                     <i class="fa-solid fa-users-gear nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">จัดการผู้ใช้</span>
                 </a>
+                <a href="{% url 'audit_logs' %}" class="nav-link {% if request.path == '/audit-logs/' %}active{% endif %}">
+                    <i class="fa-solid fa-clock-rotate-left nav-icon" aria-hidden="true"></i>
+                    <span class="nav-label">ประวัติการใช้งาน</span>
+                </a>
                 {% endif %}
             </nav>
 
@@ -64,7 +68,7 @@
                     </a>
                     <button type="button" id="team-popup-trigger" class="quick-btn quick-btn-team" aria-haspopup="dialog" aria-controls="team-modal">
                         <i class="fa-solid fa-users-rays" aria-hidden="true"></i>
-                        <span>TEAM</span>
+                        <span>OUR TEAM</span>
                     </button>
                 </div>
                 <div class="topbar-user">
@@ -109,7 +113,7 @@
     {% endif %}
 
     {% if not user.is_authenticated and request.path == '/login/' %}
-    <div class="app-version-number" role="contentinfo" aria-label="Current version 0.5.420">0.5.420</div>
+    <div class="app-version-number" role="contentinfo" aria-label="Current version 0.6.954">0.6.954</div>
     {% endif %}
 </body>
 </html>
