@@ -48,6 +48,9 @@ CSRF_TRUSTED_ORIGINS = [
     if origin.strip()
 ]
 
+CLARITY_PROJECT_ID = os.getenv('CLARITY_PROJECT_ID', '').strip()
+CLARITY_ENABLED = env_bool('CLARITY_ENABLED', default=not DEBUG)
+
 
 # Application definition
 
@@ -88,6 +91,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'spu_medbay.context_processors.clarity_settings',
             ],
         },
     },

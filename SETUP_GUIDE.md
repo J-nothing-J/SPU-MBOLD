@@ -73,11 +73,15 @@ The project supports these environment variables:
 - `DATABASE_URL` (used in production, provided by Heroku Postgres)
 - `JAWSDB_URL` (optional, used when deploying with JawsDB MySQL)
 - `DJANGO_SECURE_SSL_REDIRECT` (`True` or `False`, default True in production)
+- `CLARITY_PROJECT_ID` (Microsoft Clarity project ID)
+- `CLARITY_ENABLED` (`True` or `False`, defaults to enabled when `DJANGO_DEBUG=False`)
 
 Example local values (optional):
 
 - `DJANGO_DEBUG=True`
 - `ALLOWED_HOSTS=127.0.0.1,localhost`
+- `CLARITY_PROJECT_ID=w7gi3hf2vh`
+- `CLARITY_ENABLED=False`
 
 ## 6. Deploy to Heroku Using GitHub
 
@@ -117,6 +121,8 @@ In Settings -> Reveal Config Vars, set:
 - `DJANGO_DEBUG=False`
 - `ALLOWED_HOSTS=<your-app-name>.herokuapp.com,.herokuapp.com`
 - `CSRF_TRUSTED_ORIGINS=https://<your-app-name>.herokuapp.com`
+- `CLARITY_PROJECT_ID=w7gi3hf2vh`
+- `CLARITY_ENABLED=True`
 
 Notes:
 - `DATABASE_URL` is automatically added by Heroku Postgres.
