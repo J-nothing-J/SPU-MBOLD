@@ -1,6 +1,6 @@
 {% load static %}
 
-<div id="team-modal" class="team-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="team-modal-title">
+<div id="team-modal" class="team-modal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="team-modal-title" tabindex="-1">
     <div class="team-modal-backdrop" data-team-close></div>
     <section class="team-modal-panel" role="document">
         <button type="button" class="team-modal-close" aria-label="Close team popup" data-team-close>
@@ -63,29 +63,84 @@
     }
 
     const closeTargets = modal.querySelectorAll('[data-team-close]');
+    const focusableSelector = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    let previousFocus = null;
+
+    function getFocusableElements() {
+        return Array.from(modal.querySelectorAll(focusableSelector));
+    }
+
+    function trapFocus(event) {
+        const focusableElements = getFocusableElements();
+        if (!focusableElements.length) {
+            event.preventDefault();
+            modal.focus();
+            return;
+        }
+
+        const first = focusableElements[0];
+        const last = focusableElements[focusableElements.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+        }
+    }
+
+    function handleKeydown(event) {
+        if (!modal.classList.contains('is-open')) {
+            return;
+        }
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            closeModal();
+            return;
+        }
+
+        if (event.key === 'Tab') {
+            trapFocus(event);
+        }
+    }
 
     function openModal() {
+        previousFocus = document.activeElement;
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
+        trigger.setAttribute('aria-expanded', 'true');
         document.body.classList.add('team-modal-open');
+
+        const focusableElements = getFocusableElements();
+        if (focusableElements.length) {
+            focusableElements[0].focus();
+        } else {
+            modal.focus();
+        }
     }
 
     function closeModal() {
         modal.classList.remove('is-open');
         modal.setAttribute('aria-hidden', 'true');
+        trigger.setAttribute('aria-expanded', 'false');
         document.body.classList.remove('team-modal-open');
+
+        if (previousFocus && typeof previousFocus.focus === 'function') {
+            previousFocus.focus();
+        } else {
+            trigger.focus();
+        }
     }
 
+    trigger.setAttribute('aria-expanded', 'false');
     trigger.addEventListener('click', openModal);
 
     closeTargets.forEach(function (item) {
         item.addEventListener('click', closeModal);
     });
 
-    document.addEventListener('keydown', function (event) {
-        if (event.key === 'Escape' && modal.classList.contains('is-open')) {
-            closeModal();
-        }
-    });
+    document.addEventListener('keydown', handleKeydown);
 })();
 </script>

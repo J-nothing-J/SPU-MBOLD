@@ -32,6 +32,38 @@
 
     <div class="data-grid">
         <article class="panel">
+            <h2>เตียงที่กำลังใช้งาน</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>หมายเลขเตียง</th>
+                        <th>ผู้ป่วย</th>
+                        <th>เวลาเข้าพัก</th>
+                        <th>ระยะเวลา</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bed in active_beds %}
+                    <tr>
+                        <td>{{ bed.id }}</td>
+                        <td>{{ bed.patient.name|default:'-' }}</td>
+                        <td>
+                            {% if bed.admission_date %}
+                            {{ bed.admission_date|date:'d/m/Y H:i' }}
+                            {% else %}
+                            -
+                            {% endif %}
+                        </td>
+                        <td class="bed-duration" data-admission-at="{{ bed.admission_date|date:'c' }}">-</td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="4">ยังไม่มีเตียงที่กำลังใช้งาน</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </article>
+
+        <article class="panel">
             <h2>เคสล่าสุด</h2>
             <table>
                 <thead>
@@ -82,4 +114,57 @@
         </article>
     </div>
 </section>
+
+<script>
+(function () {
+    const durationCells = Array.from(document.querySelectorAll('.bed-duration'));
+    if (!durationCells.length) {
+        return;
+    }
+
+    function formatDuration(totalMinutes) {
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        return `${hours} ชม. ${minutes} นาที`;
+    }
+
+    function updateDurations() {
+        const now = new Date();
+
+        durationCells.forEach((cell) => {
+            const admissionISO = cell.getAttribute('data-admission-at');
+            if (!admissionISO) {
+                cell.textContent = '-';
+                cell.style.color = '';
+                cell.style.fontWeight = '';
+                return;
+            }
+
+            const admissionDate = new Date(admissionISO);
+            if (Number.isNaN(admissionDate.getTime())) {
+                cell.textContent = '-';
+                cell.style.color = '';
+                cell.style.fontWeight = '';
+                return;
+            }
+
+            const diffMinutes = Math.max(0, Math.floor((now - admissionDate) / 60000));
+            const formatted = formatDuration(diffMinutes);
+
+            if (diffMinutes >= 120) {
+                cell.innerHTML = `<i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> ${formatted}`;
+                cell.style.color = '#d93025';
+                cell.style.fontWeight = '700';
+            } else {
+                cell.textContent = formatted;
+                cell.style.color = '';
+                cell.style.fontWeight = '';
+            }
+        });
+    }
+
+    updateDurations();
+    window.setInterval(updateDurations, 60000);
+})();
+</script>
 {% endblock %}

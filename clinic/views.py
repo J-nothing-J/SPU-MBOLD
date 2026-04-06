@@ -160,7 +160,12 @@ def logout_view(request):
 @login_required
 def dashboard_view(request):
 	today = timezone.localdate()
-	occupied_beds = Bed.objects.filter(status=Bed.Status.OCCUPIED).count()
+	active_beds = (
+		Bed.objects.filter(status=Bed.Status.OCCUPIED)
+		.select_related('patient')
+		.order_by('-admission_date', 'id')
+	)
+	occupied_beds = active_beds.count()
 	total_beds = Bed.objects.count()
 
 	context = {
@@ -170,6 +175,7 @@ def dashboard_view(request):
 		'total_medicines': Medicine.objects.count(),
 		'low_stock_count': Medicine.objects.filter(stock__lte=10).count(),
 		'today_cases': Case.objects.filter(occurred_at__date=today).count(),
+		'active_beds': active_beds,
 		'recent_cases': Case.objects.select_related('patient', 'nurse').order_by('-occurred_at')[:10],
 		'low_stock_medicines': Medicine.objects.filter(stock__lte=10).order_by('stock', 'name')[:10],
 	}

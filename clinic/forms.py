@@ -1,3 +1,5 @@
+import uuid
+
 from django import forms
 from django.utils import timezone
 
@@ -63,6 +65,37 @@ EMPLOYEE_ORGANIZATION_CHOICES = [
     ('มูลนิธิมหาวิทยาลัยศรีปทุม', 'มูลนิธิมหาวิทยาลัยศรีปทุม'),
     ('Other', 'อื่นๆ'),
 ]
+
+MEDICINE_CATEGORY_CHOICES = [
+    ('', 'เลือกหมวดหมู่'),
+    ('ยาแก้ปวด / ลดไข้', 'ยาแก้ปวด / ลดไข้'),
+    ('ยาแก้แพ้ / ลดน้ำมูก', 'ยาแก้แพ้ / ลดน้ำมูก'),
+    ('ยาแก้หวัด', 'ยาแก้หวัด'),
+    ('ยาแก้ไอ / ขับเสมหะ และยาอม', 'ยาแก้ไอ / ขับเสมหะ และยาอม'),
+    ('ยาขับลม', 'ยาขับลม'),
+    ('ยาลดกรดในกระเพาะอาหาร', 'ยาลดกรดในกระเพาะอาหาร'),
+    ('ยาแก้เวียนศีรษะ / คลื่นไส้ / อาเจียน', 'ยาแก้เวียนศีรษะ / คลื่นไส้ / อาเจียน'),
+    ('ยาลดอาการปวดเกร็ง', 'ยาลดอาการปวดเกร็ง'),
+    ('ยาแก้ท้องเสีย', 'ยาแก้ท้องเสีย'),
+    ('ยาอม', 'ยาอม'),
+    ('ยาใช้ภายนอก', 'ยาใช้ภายนอก'),
+    ('อุปกรณ์ทำแผล', 'อุปกรณ์ทำแผล'),
+    ('อื่นๆ', 'อื่นๆ'),
+]
+
+MEDICINE_UNIT_CHOICES = [
+    ('', 'เลือกหน่วย'),
+    ('เม็ด', 'เม็ด'),
+    ('ชิ้น', 'ชิ้น'),
+    ('ซอง', 'ซอง'),
+    ('ขวด', 'ขวด'),
+]
+
+
+def generate_medicine_id() -> str:
+    timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
+    suffix = uuid.uuid4().hex[:4].upper()
+    return f'MED-{timestamp}-{suffix}'
 
 
 def detect_id_type_from_value(value: str | None) -> str | None:
@@ -247,9 +280,66 @@ class PatientEditForm(forms.ModelForm):
 
 
 class MedicineForm(forms.ModelForm):
+    id = forms.CharField(required=False, widget=forms.HiddenInput())
+    category = forms.ChoiceField(choices=MEDICINE_CATEGORY_CHOICES, label='หมวด')
+    unit = forms.ChoiceField(choices=MEDICINE_UNIT_CHOICES, label='หน่วย')
+
     class Meta:
         model = Medicine
         fields = ['id', 'name', 'category', 'unit', 'stock']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        base_choices = list(MEDICINE_CATEGORY_CHOICES)
+        existing_values = {value for value, _label in base_choices}
+
+        # Keep existing/legacy categories selectable so editing old data remains safe.
+        existing_categories = (
+            Medicine.objects.exclude(category__isnull=True)
+            .exclude(category__exact='')
+            .values_list('category', flat=True)
+            .distinct()
+            .order_by('category')
+        )
+        for category_value in existing_categories:
+            if category_value not in existing_values:
+                base_choices.append((category_value, category_value))
+
+        current_category = self.data.get('category') if self.is_bound else getattr(self.instance, 'category', '')
+        self.fields['category'].choices = append_choice_if_missing(base_choices, current_category)
+
+        unit_choices = list(MEDICINE_UNIT_CHOICES)
+        existing_units = {value for value, _label in unit_choices}
+
+        legacy_units = (
+            Medicine.objects.exclude(unit__isnull=True)
+            .exclude(unit__exact='')
+            .values_list('unit', flat=True)
+            .distinct()
+            .order_by('unit')
+        )
+        for unit_value in legacy_units:
+            if unit_value not in existing_units:
+                unit_choices.append((unit_value, unit_value))
+
+        current_unit = self.data.get('unit') if self.is_bound else getattr(self.instance, 'unit', '')
+        self.fields['unit'].choices = append_choice_if_missing(unit_choices, current_unit)
+
+    def clean_id(self):
+        medicine_id = (self.cleaned_data.get('id') or '').strip()
+        if medicine_id:
+            return medicine_id
+
+        if self.instance and self.instance.pk:
+            return self.instance.pk
+
+        for _ in range(5):
+            candidate = generate_medicine_id()
+            if not Medicine.objects.filter(pk=candidate).exists():
+                return candidate
+
+        raise forms.ValidationError('ไม่สามารถสร้างรหัสยาอัตโนมัติได้ กรุณาลองใหม่อีกครั้ง')
 
 
 class BedForm(forms.ModelForm):

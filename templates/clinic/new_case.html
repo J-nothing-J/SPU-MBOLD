@@ -14,13 +14,17 @@
         <div class="message error">{{ form.non_field_errors|join:', ' }}</div>
         {% endif %}
 
+        <div id="new-case-live-status" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+        <div id="new-case-live-alert" class="sr-only" role="alert" aria-live="assertive" aria-atomic="true"></div>
+
         <div class="form-grid two-col" style="align-items: start;">
             <label>
                 {{ form.student_id.label }}
                 <div style="display: flex; gap: 8px;">
                     {{ form.student_id }}
-                    <button type="button" id="search-patient-btn" class="btn btn-secondary" style="flex-shrink: 0; padding: 4px 12px; height: 38px;" title="ค้นหาประวัติ">
-                        <i class="fa-solid fa-magnifying-glass"></i>
+                    <button type="button" id="search-patient-btn" class="btn btn-secondary" style="flex-shrink: 0; padding: 4px 12px; height: 44px; min-width: 44px;" title="ค้นหาประวัติ" aria-label="ค้นหาประวัติผู้ป่วย">
+                        <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+                        <span class="sr-only">ค้นหาประวัติผู้ป่วย</span>
                     </button>
                 </div>
                 <div class="id-type-indicator" aria-live="polite">
@@ -104,7 +108,7 @@
                             <input type="number" min="1" step="1" name="medicine_quantity" value="{{ row.quantity|default:'1' }}" required>
                         </td>
                         <td>
-                            <button type="button" class="btn btn-secondary remove-row-btn">ลบแถว</button>
+                            <button type="button" class="btn btn-secondary remove-row-btn" aria-label="ลบแถวรายการยา">ลบแถว</button>
                         </td>
                     </tr>
                     {% endfor %}
@@ -112,7 +116,7 @@
             </table>
 
             <div class="toolbar-row">
-                <button type="button" class="btn btn-secondary" id="add-medicine-row-btn">+ เพิ่มรายการยา</button>
+                <button type="button" class="btn btn-secondary" id="add-medicine-row-btn" aria-label="เพิ่มแถวรายการยา">+ เพิ่มรายการยา</button>
             </div>
         </div>
 
@@ -130,9 +134,20 @@
 (function () {
     const body = document.getElementById('medicine-rows-body');
     const addButton = document.getElementById('add-medicine-row-btn');
+    const liveStatus = document.getElementById('new-case-live-status');
 
     if (!body || !addButton) {
         return;
+    }
+
+    function announceStatus(message) {
+        if (!liveStatus) {
+            return;
+        }
+        liveStatus.textContent = '';
+        window.setTimeout(() => {
+            liveStatus.textContent = message;
+        }, 0);
     }
 
     const medicineOptions = `
@@ -152,10 +167,11 @@
                 <input type="number" min="1" step="1" name="medicine_quantity" value="1" required>
             </td>
             <td>
-                <button type="button" class="btn btn-secondary remove-row-btn">ลบแถว</button>
+                <button type="button" class="btn btn-secondary remove-row-btn" aria-label="ลบแถวรายการยา">ลบแถว</button>
             </td>
         `;
         body.appendChild(tr);
+        announceStatus('เพิ่มแถวรายการยาแล้ว');
     }
 
     function removeRow(button) {
@@ -166,9 +182,11 @@
         if (body.children.length <= 1) {
             row.querySelector('select[name="medicine_id"]').value = '';
             row.querySelector('input[name="medicine_quantity"]').value = '1';
+            announceStatus('คงเหลืออย่างน้อย 1 แถว ระบบล้างข้อมูลแถวปัจจุบันแล้ว');
             return;
         }
         row.remove();
+        announceStatus('ลบแถวรายการยาแล้ว');
     }
 
     addButton.addEventListener('click', makeRow);
@@ -188,9 +206,33 @@
     const studentFlag = document.getElementById('id-type-student-flag');
     const employeeFlag = document.getElementById('id-type-employee-flag');
     const hint = document.getElementById('id-type-hint');
+    const liveStatus = document.getElementById('new-case-live-status');
+    const liveAlert = document.getElementById('new-case-live-alert');
+    let previousIdType = null;
+    let hasInitialized = false;
 
     if (!idInput || !organizationSelect || !studentFlag || !employeeFlag || !hint) {
         return;
+    }
+
+    function announcePolite(message) {
+        if (!liveStatus) {
+            return;
+        }
+        liveStatus.textContent = '';
+        window.setTimeout(() => {
+            liveStatus.textContent = message;
+        }, 0);
+    }
+
+    function announceAlert(message) {
+        if (!liveAlert) {
+            return;
+        }
+        liveAlert.textContent = '';
+        window.setTimeout(() => {
+            liveAlert.textContent = message;
+        }, 0);
     }
 
     const studentOptions = JSON.parse(document.getElementById('student-organization-options').textContent);
@@ -258,6 +300,19 @@
         }
 
         updateOrgOptions(idType);
+
+        if (hasInitialized && idType !== previousIdType) {
+            if (idType === 'student') {
+                announcePolite('ตรวจพบรหัสประเภท Student ID (8 หลัก)');
+            } else if (idType === 'employee') {
+                announcePolite('ตรวจพบรหัสประเภท Employee ID (7 หลัก)');
+            } else {
+                announcePolite('ยังไม่สามารถระบุประเภทรหัสได้ กรุณากรอก 7 หรือ 8 หลัก');
+            }
+        }
+
+        previousIdType = idType;
+        hasInitialized = true;
     }
 
     idInput.addEventListener('input', updateIndicatorAndSelect);
@@ -271,12 +326,14 @@
         searchBtn.addEventListener('click', () => {
             const val = idInput.value;
             if (!val || val.length < 7) {
-                alert('กรุณากรอกรหัส 7 หรือ 8 หลักให้ครบถ้วนก่อนค้นหา');
+                announceAlert('กรุณากรอกรหัส 7 หรือ 8 หลักให้ครบถ้วนก่อนค้นหา');
+                idInput.focus();
                 return;
             }
             
-            searchBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            searchBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin" aria-hidden="true"></i><span class="sr-only">กำลังค้นหาประวัติผู้ป่วย</span>';
             searchBtn.disabled = true;
+            announcePolite('กำลังค้นหาประวัติผู้ป่วย');
 
             fetch(`/api/patients/${val}/`)
                 .then(res => {
@@ -290,15 +347,14 @@
                     updateOrgOptions(detectIdType(val));
                     // Then we can set the organization value
                     organizationSelect.value = data.organization || '';
-                    
-                    // Simple small notification or alert
-                    alert('พบข้อมูลผู้ป่วยเดิม ระบบได้เติมข้อมูลอัตโนมัติแล้ว');
+
+                    announcePolite('พบข้อมูลผู้ป่วยเดิม ระบบเติมข้อมูลให้อัตโนมัติแล้ว');
                 })
                 .catch(err => {
-                    alert('ไม่พบข้อมูลผู้ป่วย หรือเป็นผู้ป่วยใหม่ (กรุณากรอกข้อมูลเพิ่ม)');
+                    announcePolite('ไม่พบข้อมูลผู้ป่วย ระบบพร้อมให้กรอกข้อมูลผู้ป่วยใหม่');
                 })
                 .finally(() => {
-                    searchBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass"></i>';
+                    searchBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="sr-only">ค้นหาประวัติผู้ป่วย</span>';
                     searchBtn.disabled = false;
                 });
         });

@@ -323,3 +323,39 @@ class UserManagementFlowTests(TestCase):
 		self.assertEqual(response.status_code, 200)
 		self.assertFalse(AppUser.objects.filter(username='admin_no_password').exists())
 		self.assertContains(response, 'กรอกรหัสผ่านสำหรับผู้ใช้ Admin ใหม่')
+
+
+class AccessibilityMarkupTests(TestCase):
+	def setUp(self):
+		self.client = Client()
+		self.nurse = AppUser.objects.create_user(
+			username='nurse_a11y',
+			password='nurse1234',
+			role=AppUser.Role.NURSE,
+			status=AppUser.Status.ACTIVE,
+		)
+		Medicine.objects.create(
+			id='MED-A11Y-001',
+			name='A11Y Test Medicine',
+			category='General',
+			unit='Tablet',
+			stock=20,
+		)
+
+	def test_login_page_contains_skip_link_and_main_target(self):
+		response = self.client.get(reverse('login'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'href="#main-content"')
+		self.assertContains(response, 'Skip to main content')
+		self.assertContains(response, 'id="main-content"')
+
+	def test_new_case_template_uses_live_regions_and_avoids_alert_calls(self):
+		self.client.force_login(self.nurse)
+		response = self.client.get(reverse('new_case'))
+
+		self.assertEqual(response.status_code, 200)
+		self.assertContains(response, 'id="new-case-live-status"')
+		self.assertContains(response, 'id="new-case-live-alert"')
+		self.assertContains(response, 'aria-label="ค้นหาประวัติผู้ป่วย"')
+		self.assertNotContains(response, 'alert(')

@@ -15,41 +15,41 @@
             <div class="brand-block">
                 <div class="brand-row">
                     <div class="brand">SP<span class="brand-u">U</span> Medbay</div>
-                    <span class="brand-version" aria-label="Version 0.6.954">v0.6.954</span>
+                    <span class="brand-version" aria-label="Version 0.6.954">0.6.954 DEMO</span>
                 </div>
                 <div class="brand-campus">Campus: Bang Khen</div>
             </div>
-            <nav>
-                <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}">
+            <nav aria-label="เมนูหลัก">
+                <a href="{% url 'dashboard' %}" class="nav-link {% if request.path == '/dashboard/' %}active{% endif %}" {% if request.path == '/dashboard/' %}aria-current="page"{% endif %}>
                     <i class="fa-solid fa-gauge-high nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">แดชบอร์ด</span>
                 </a>
-                <a href="{% url 'new_case' %}" class="nav-link nav-link-cta {% if request.path == '/new-case/' %}active{% endif %}">
+                <a href="{% url 'new_case' %}" class="nav-link nav-link-cta {% if request.path == '/new-case/' %}active{% endif %}" {% if request.path == '/new-case/' %}aria-current="page"{% endif %}>
                     <i class="fa-solid fa-notes-medical nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">บันทึกเคสใหม่</span>
                 </a>
-                <a href="{% url 'cases' %}" class="nav-link {% if request.path == '/cases/' %}active{% endif %}">
+                <a href="{% url 'cases' %}" class="nav-link {% if request.path == '/cases/' %}active{% endif %}" {% if request.path == '/cases/' %}aria-current="page"{% endif %}>
                     <i class="fa-solid fa-clipboard-list nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">รายการเคส</span>
                 </a>
-                <a href="{% url 'patients' %}" class="nav-link {% if request.path == '/patients/' %}active{% endif %}">
+                <a href="{% url 'patients' %}" class="nav-link {% if request.path == '/patients/' %}active{% endif %}" {% if request.path == '/patients/' %}aria-current="page"{% endif %}>
                     <i class="fa-solid fa-user-group nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">ข้อมูลผู้ป่วย</span>
                 </a>
-                <a href="{% url 'inventory' %}" class="nav-link {% if request.path == '/inventory/' %}active{% endif %}">
+                <a href="{% url 'inventory' %}" class="nav-link {% if request.path == '/inventory/' %}active{% endif %}" {% if request.path == '/inventory/' %}aria-current="page"{% endif %}>
                     <i class="fa-solid fa-capsules nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">คลังยา</span>
                 </a>
-                <a href="{% url 'beds' %}" class="nav-link {% if request.path == '/beds/' %}active{% endif %}">
+                <a href="{% url 'beds' %}" class="nav-link {% if request.path == '/beds/' %}active{% endif %}" {% if request.path == '/beds/' %}aria-current="page"{% endif %}>
                     <i class="fa-solid fa-bed nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">จัดการเตียง</span>
                 </a>
                 {% if user.role == 'Admin' %}
-                <a href="{% url 'user_management' %}" class="nav-link {% if request.path == '/users/' %}active{% endif %}">
+                <a href="{% url 'user_management' %}" class="nav-link {% if request.path == '/users/' %}active{% endif %}" {% if request.path == '/users/' %}aria-current="page"{% endif %}>
                     <i class="fa-solid fa-users-gear nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">จัดการผู้ใช้</span>
                 </a>
-                <a href="{% url 'audit_logs' %}" class="nav-link {% if request.path == '/audit-logs/' %}active{% endif %}">
+                <a href="{% url 'audit_logs' %}" class="nav-link {% if request.path == '/audit-logs/' %}active{% endif %}" {% if request.path == '/audit-logs/' %}aria-current="page"{% endif %}>
                     <i class="fa-solid fa-clock-rotate-left nav-icon" aria-hidden="true"></i>
                     <span class="nav-label">ประวัติการใช้งาน</span>
                 </a>
@@ -57,7 +57,7 @@
             </nav>
 
             <div class="sidebar-footer">
-                <div class="sidebar-quick-buttons" aria-label="Quick shortcuts">
+                <div class="sidebar-quick-buttons" role="navigation" aria-label="Quick shortcuts">
                     <a href="{% url 'dashboard' %}" class="quick-btn {% if request.path == '/dashboard/' %}active{% endif %}">
                         <i class="fa-solid fa-star" aria-hidden="true"></i>
                         <span>DASH</span>
@@ -85,11 +85,11 @@
             </div>
         </aside>
 
-        <main class="content">
+        <main id="main-content" class="content" tabindex="-1">
             {% if messages %}
-            <section class="messages">
+            <section class="messages" role="status" aria-live="polite" aria-atomic="true">
                 {% for message in messages %}
-                <div class="message {{ message.tags }}">{{ message }}</div>
+                <div class="message {{ message.tags }}" {% if 'error' in message.tags %}role="alert" aria-live="assertive"{% else %}role="status" aria-live="polite"{% endif %}>{{ message }}</div>
                 {% endfor %}
             </section>
             {% endif %}
@@ -100,11 +100,11 @@
 
     {% include 'clinic/team_popup.html' %}
     {% else %}
-    <main class="auth-wrapper">
+    <main id="main-content" class="auth-wrapper" tabindex="-1">
         {% if messages %}
-        <section class="messages">
+        <section class="messages" role="status" aria-live="polite" aria-atomic="true">
             {% for message in messages %}
-            <div class="message {{ message.tags }}">{{ message }}</div>
+            <div class="message {{ message.tags }}" {% if 'error' in message.tags %}role="alert" aria-live="assertive"{% else %}role="status" aria-live="polite"{% endif %}>{{ message }}</div>
             {% endfor %}
         </section>
         {% endif %}
@@ -113,7 +113,7 @@
     {% endif %}
 
     {% if not user.is_authenticated and request.path == '/login/' %}
-    <div class="app-version-number" role="contentinfo" aria-label="Current version 0.6.954">0.6.954</div>
+    <div class="app-version-number" role="contentinfo" aria-label="Current version 0.6.954">0.6.954 DEMO</div>
     {% endif %}
 </body>
 </html>

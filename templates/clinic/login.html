@@ -81,7 +81,7 @@
         </article>
     </div>
     
-    <button type="button" id="team-popup-trigger" class="team-modal-tagline" style="background: none; border: none; padding: 12px 0 0 0; cursor: pointer; width: 100%; display: block; border-top: 1px solid rgba(16, 22, 31, 0.14); margin-top: 32px; font-family: inherit;">
+    <button type="button" id="team-popup-trigger" class="team-modal-tagline" aria-haspopup="dialog" aria-controls="team-modal" style="background: none; border: none; padding: 12px 0 0 0; cursor: pointer; width: 100%; display: block; border-top: 1px solid rgba(16, 22, 31, 0.14); margin-top: 32px; font-family: inherit;">
         Cooking with 💜 by SPU:SIT_ICT Students
     </button>
 </section>
@@ -95,28 +95,80 @@
 
     if (popup) {
         const closeTargets = popup.querySelectorAll('[data-login-demo-close]');
+        const focusableSelector = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+        let previousFocus = null;
+
+        popup.setAttribute('tabindex', '-1');
+
+        function getFocusableElements() {
+            return Array.from(popup.querySelectorAll(focusableSelector));
+        }
+
+        function trapFocus(event) {
+            const focusableElements = getFocusableElements();
+            if (!focusableElements.length) {
+                event.preventDefault();
+                popup.focus();
+                return;
+            }
+
+            const first = focusableElements[0];
+            const last = focusableElements[focusableElements.length - 1];
+
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+
+        function handlePopupKeydown(event) {
+            if (!popup.classList.contains('is-open')) {
+                return;
+            }
+
+            if (event.key === 'Escape') {
+                event.preventDefault();
+                closePopup();
+                return;
+            }
+
+            if (event.key === 'Tab') {
+                trapFocus(event);
+            }
+        }
 
         function openPopup() {
+            previousFocus = document.activeElement;
             popup.classList.add('is-open');
             popup.setAttribute('aria-hidden', 'false');
             document.body.classList.add('login-demo-popup-open');
+
+            const focusableElements = getFocusableElements();
+            if (focusableElements.length) {
+                focusableElements[0].focus();
+            } else {
+                popup.focus();
+            }
         }
 
         function closePopup() {
             popup.classList.remove('is-open');
             popup.setAttribute('aria-hidden', 'true');
             document.body.classList.remove('login-demo-popup-open');
+
+            if (previousFocus && typeof previousFocus.focus === 'function') {
+                previousFocus.focus();
+            }
         }
 
         closeTargets.forEach(function (item) {
             item.addEventListener('click', closePopup);
         });
 
-        document.addEventListener('keydown', function (event) {
-            if (event.key === 'Escape' && popup.classList.contains('is-open')) {
-                closePopup();
-            }
-        });
+        document.addEventListener('keydown', handlePopupKeydown);
 
         openPopup();
     }
