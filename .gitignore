@@ -19,3 +19,7 @@ staticfiles/
 # Editor/OS artifacts
 .DS_Store
 Thumbs.db
+
+# Project plans
+plan.md
+2long_plan.md
