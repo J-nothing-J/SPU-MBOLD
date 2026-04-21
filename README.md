@@ -45,11 +45,20 @@
 
 ## 🛠️ เทคโนโลยีที่ใช้งาน (Tech Stack)
 
-- **Backend:** Python 3.11+, 
-- **Frontend:** HTML5, CSS3, JavaScript (เน้น UI ที่เป็นมิตรและตอบสนองเร็ว)
-- **Database:** SQLite (สำหรับการพัฒนาและการทดสอบ) 
+- **Backend:** Python 3.11+, Django Framework
+- **Frontend:** HTML5, CSS3, JavaScript 
+- **Database:** MySQL 
 - **Logs:** Django Simple History
-- **Deploy/Hosting:** Heroku
+- **Container:** Docker
+- **Analytics:** Google Analytics
+- **Error Tracking:** Sentry
+
+## 🚧🛠️ เทคโนโลยีที่ใช้งาน เพื่อการเดโม (Tech Stack in DEMO)
+- **Database:** SQLite
+- **Analytics:** Microsoft Clarity
+- **Deploy/Hosting:** Heroku(PaaS)
+- **CDN:** Cloudflare
+
 
 ---
 
@@ -104,18 +113,18 @@
 
 ## 📸 ภาพตัวอย่างหน้าจอระบบ (Screenshots)
 
-![Login]  
+![Login](https://github.com/J-nothing-J/SPU-MD_Django/blob/main/README-Files/Login.png?raw=true)
 *ภาพตัวอย่าง: หน้าการเข้าสู่ระบบ*
 
-![Dashboard]  
+![Dashboard](https://github.com/J-nothing-J/SPU-MD_Django/blob/main/README-Files/Dashboard.png?raw=true)
 *ภาพตัวอย่าง: หน้าแดชบอร์ด*
 
-![Report]  
+![Report](https://github.com/J-nothing-J/SPU-MD_Django/blob/main/README-Files/Report.png?raw=true)
 *ภาพตัวอย่าง: หน้าระบบการกรอกประวัติ*
 
-![Beds]  
+![Beds](https://github.com/J-nothing-J/SPU-MD_Django/blob/main/README-Files/Beds.png?raw=true)
 *ภาพตัวอย่าง: หน้าระบบจัดการเตียง*
 
 ---
 
-> **ทำด้วย 💜 by SPU:SIT_ICT**
+> **ทำด้วย 💜 by SPU:SIT_ICT Students**
