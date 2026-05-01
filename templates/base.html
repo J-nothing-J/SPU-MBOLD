@@ -80,10 +80,6 @@
                         <i class="fa-solid fa-star" aria-hidden="true"></i>
                         <span>CASE</span>
                     </a>
-                    <button type="button" id="team-popup-trigger" class="quick-btn quick-btn-team" aria-haspopup="dialog" aria-controls="team-modal">
-                        <i class="fa-solid fa-users-rays" aria-hidden="true"></i>
-                        <span>OUR TEAM</span>
-                    </button>
                 </div>
                 <div class="topbar-user">
                     <span>{{ user.get_full_name|default:user.username }}</span>
@@ -112,7 +108,6 @@
         </main>
     </div>
 
-    {% include 'clinic/team_popup.html' %}
     {% else %}
     <main id="main-content" class="auth-wrapper" tabindex="-1">
         {% if messages %}
