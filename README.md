@@ -55,7 +55,6 @@
 
 ## 🚧🛠️ เทคโนโลยีที่ใช้งาน เพื่อการเดโม (Tech Stack in DEMO)
 - **Database:** SQLite
-- **Analytics:** Microsoft Clarity
 - **Deploy/Hosting:** Heroku(PaaS)
 - **CDN:** Cloudflare
 

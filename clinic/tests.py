@@ -1,4 +1,4 @@
-from django.test import Client, TestCase, override_settings
+from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
@@ -75,27 +75,6 @@ class KioskLoginFlowTests(TestCase):
 
 		self.assertEqual(response.status_code, 302)
 		self.assertEqual(response.url, reverse('dashboard'))
-
-
-@override_settings(CLARITY_ENABLED=True, CLARITY_PROJECT_ID='w7gi3hf2vh')
-class ClarityIntegrationTests(TestCase):
-	def test_clarity_script_renders_when_enabled_and_project_id_present(self):
-		response = self.client.get(reverse('login'))
-
-		self.assertContains(response, 'https://www.clarity.ms/tag/')
-		self.assertContains(response, 'w7gi3hf2vh')
-
-	@override_settings(CLARITY_ENABLED=False, CLARITY_PROJECT_ID='w7gi3hf2vh')
-	def test_clarity_script_not_rendered_when_disabled(self):
-		response = self.client.get(reverse('login'))
-
-		self.assertNotContains(response, 'https://www.clarity.ms/tag/')
-
-	@override_settings(CLARITY_ENABLED=True, CLARITY_PROJECT_ID='')
-	def test_clarity_script_not_rendered_without_project_id(self):
-		response = self.client.get(reverse('login'))
-
-		self.assertNotContains(response, 'https://www.clarity.ms/tag/')
 
 
 class NewCaseViewFlowTests(TestCase):

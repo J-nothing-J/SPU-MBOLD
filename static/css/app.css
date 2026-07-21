@@ -699,55 +699,6 @@ body.team-modal-open {
     gap: 16px;
 }
 
-body.login-page.login-demo-popup-open {
-    overflow: hidden;
-}
-
-.login-demo-popup {
-    position: fixed;
-    inset: 0;
-    z-index: 45;
-    display: none;
-}
-
-.login-demo-popup.is-open {
-    display: block;
-}
-
-.login-demo-popup-backdrop {
-    position: absolute;
-    inset: 0;
-    background: rgba(10, 19, 28, 0.48);
-}
-
-.login-demo-popup-panel {
-    position: relative;
-    width: min(420px, 92vw);
-    margin: 16vh auto 0;
-    background: #fff;
-    border: 1px solid #d5d8de;
-    border-radius: 16px;
-    padding: 18px 18px 16px;
-    box-shadow: 0 22px 38px rgba(10, 19, 28, 0.28);
-}
-
-.login-demo-popup-panel h2 {
-    margin: 0;
-    font-size: 1.2rem;
-    color: #1f2b3a;
-}
-
-.login-demo-popup-panel p {
-    margin: 8px 0 0;
-    color: #4f5d6f;
-    font-size: 0.98rem;
-}
-
-.login-demo-popup-btn {
-    margin-top: 14px;
-    width: 100%;
-}
-
 .panel {
     background: #fff;
     border: 1px solid var(--line);

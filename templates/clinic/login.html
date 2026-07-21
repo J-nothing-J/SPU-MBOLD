@@ -3,32 +3,6 @@
 {% block title %}เข้าสู่ระบบ | SPU Medbay{% endblock %}
 
 {% block auth_content %}
-<div id="login-demo-popup" class="login-demo-popup" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="login-demo-popup-title">
-    <div class="login-demo-popup-backdrop" data-login-demo-close></div>
-    <section class="login-demo-popup-panel" role="document">
-        <h2 id="login-demo-popup-title" style="margin-bottom: 12px; color: var(--brand-dark);">
-            <i class="fa-solid fa-circle-info"></i> DEMO MODE: ข้อมูลและการเข้าสู่ระบบสำหรับทดสอบ
-        </h2>
-        <div style="font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px;">
-            <p>ยินดีต้อนรับสู่ระบบจัดการห้องพยาบาล <strong>SPU Medbay</strong></p>
-            <p class="muted" style="margin-bottom: 16px;">ข้อมูลในระบบนี้เป็นข้อมูลสมมติสำหรับการทดสอบเท่านั้น โปรดอย่ากรอกข้อมูลส่วนบุคคลหรือข้อมูลผู้ป่วยจริง</p>
-            <h3 style="font-size: 0.95rem; color: var(--text);">📝 วิธีเข้าสู่ระบบเบื้องต้น</h3>
-            <ul style="margin-top: 8px; padding-left: 20px;">
-                <li style="margin-bottom: 8px;"><strong>พยาบาล:</strong> กดเลือกชื่อพยาบาลด้านล่างเพื่อเข้าสู่ระบบได้ทันที</li>
-                <li><strong>ผู้ดูแลระบบ (Admin Role):</strong> 
-                    <br>ใช้งานเมนู <i>จัดการผู้ใช้</i> และ <i>ประวัติการใช้งาน</i>
-                    <br>ชื่อผู้ใช้: <code style="background: #f1f3f5; padding: 2px 6px; border-radius: 4px;">admin</code> 
-                    <br>รหัสผ่าน: <code style="background: #f1f3f5; padding: 2px 6px; border-radius: 4px;">admin1234</code>
-                </li>
-            </ul>
-             <p style="margin: 0 0 16px 0; padding: 10px 12px; border-left: 4px solid #0b5cab; background: #f0f6ff; border-radius: 6px; color: #0f2438;">
-                ระบบ DEMO นี้มีการเก็บข้อมูลพฤติกรรมการใช้งานผ่าน <strong>Microsoft Clarity</strong> เพื่อใช้ในการวิเคราะห์และพัฒนาระบบในอนาคต
-            </p>
-        </div>
-        <button type="button" class="btn btn-primary login-demo-popup-btn" data-login-demo-close>รับทราบ และเข้าสู่ระบบทดสอบ (Enter Demo)</button>
-    </section>
-</div>
-
 <section class="login-card">
     <div class="login-hero">
         <div class="login-hero-icon" aria-hidden="true">
@@ -87,87 +61,6 @@
 <script>
 (function () {
     const clockEl = document.getElementById('login-hero-clock');
-    const popup = document.getElementById('login-demo-popup');
-
-    if (popup) {
-        const closeTargets = popup.querySelectorAll('[data-login-demo-close]');
-        const focusableSelector = 'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
-        let previousFocus = null;
-
-        popup.setAttribute('tabindex', '-1');
-
-        function getFocusableElements() {
-            return Array.from(popup.querySelectorAll(focusableSelector));
-        }
-
-        function trapFocus(event) {
-            const focusableElements = getFocusableElements();
-            if (!focusableElements.length) {
-                event.preventDefault();
-                popup.focus();
-                return;
-            }
-
-            const first = focusableElements[0];
-            const last = focusableElements[focusableElements.length - 1];
-
-            if (event.shiftKey && document.activeElement === first) {
-                event.preventDefault();
-                last.focus();
-            } else if (!event.shiftKey && document.activeElement === last) {
-                event.preventDefault();
-                first.focus();
-            }
-        }
-
-        function handlePopupKeydown(event) {
-            if (!popup.classList.contains('is-open')) {
-                return;
-            }
-
-            if (event.key === 'Escape') {
-                event.preventDefault();
-                closePopup();
-                return;
-            }
-
-            if (event.key === 'Tab') {
-                trapFocus(event);
-            }
-        }
-
-        function openPopup() {
-            previousFocus = document.activeElement;
-            popup.classList.add('is-open');
-            popup.setAttribute('aria-hidden', 'false');
-            document.body.classList.add('login-demo-popup-open');
-
-            const focusableElements = getFocusableElements();
-            if (focusableElements.length) {
-                focusableElements[0].focus();
-            } else {
-                popup.focus();
-            }
-        }
-
-        function closePopup() {
-            popup.classList.remove('is-open');
-            popup.setAttribute('aria-hidden', 'true');
-            document.body.classList.remove('login-demo-popup-open');
-
-            if (previousFocus && typeof previousFocus.focus === 'function') {
-                previousFocus.focus();
-            }
-        }
-
-        closeTargets.forEach(function (item) {
-            item.addEventListener('click', closePopup);
-        });
-
-        document.addEventListener('keydown', handlePopupKeydown);
-
-        openPopup();
-    }
 
     if (!clockEl) {
         return;
