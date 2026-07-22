@@ -57,16 +57,6 @@
             </nav>
 
             <div class="sidebar-footer">
-                <div class="sidebar-quick-buttons" role="navigation" aria-label="Quick shortcuts">
-                    <a href="{% url 'dashboard' %}" class="quick-btn {% if request.path == '/dashboard/' %}active{% endif %}">
-                        <i class="fa-solid fa-star" aria-hidden="true"></i>
-                        <span>DASH</span>
-                    </a>
-                    <a href="{% url 'new_case' %}" class="quick-btn {% if request.path == '/new-case/' %}active{% endif %}">
-                        <i class="fa-solid fa-star" aria-hidden="true"></i>
-                        <span>CASE</span>
-                    </a>
-                </div>
                 <div class="topbar-user">
                     <span>{{ user.get_full_name|default:user.username }}</span>
                     <span class="badge">{{ user.role }}</span>

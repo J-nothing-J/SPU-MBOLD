@@ -29,14 +29,18 @@
                 </div>
                 <div class="id-type-indicator" aria-live="polite">
                     <label class="id-type-flag">
-                        <input type="checkbox" id="id-type-student-flag" disabled>
-                        <span>Student ID (8 หลัก)</span>
+                        <input type="checkbox" id="id-type-student-flag">
+                        <span>นักศึกษา</span>
                     </label>
                     <label class="id-type-flag">
-                        <input type="checkbox" id="id-type-employee-flag" disabled>
-                        <span>Employee ID (7 หลัก)</span>
+                        <input type="checkbox" id="id-type-employee-flag">
+                        <span>บุคลากร</span>
                     </label>
-                    <span class="id-type-hint" id="id-type-hint">กรอก 7 หรือ 8 หลักเพื่อให้ระบบระบุประเภทอัตโนมัติ</span>
+                    <label class="id-type-flag">
+                        <input type="checkbox" id="id-type-other-flag">
+                        <span>อื่นๆ</span>
+                    </label>
+                    <span class="id-type-hint" id="id-type-hint">กรุณาเลือกประเภทรหัส (Student ID หรือ Employee ID) ด้วยตนเอง</span>
                 </div>
                 {% if form.student_id.errors %}<span class="field-error">{{ form.student_id.errors|join:', ' }}</span>{% endif %}
             </label>
@@ -205,13 +209,14 @@
     const organizationSelect = document.getElementById('id_organization');
     const studentFlag = document.getElementById('id-type-student-flag');
     const employeeFlag = document.getElementById('id-type-employee-flag');
+    const otherFlag = document.getElementById('id-type-other-flag');
     const hint = document.getElementById('id-type-hint');
     const liveStatus = document.getElementById('new-case-live-status');
     const liveAlert = document.getElementById('new-case-live-alert');
     let previousIdType = null;
     let hasInitialized = false;
 
-    if (!idInput || !organizationSelect || !studentFlag || !employeeFlag || !hint) {
+    if (!idInput || !organizationSelect || !studentFlag || !employeeFlag || !otherFlag || !hint) {
         return;
     }
 
@@ -238,22 +243,47 @@
     const studentOptions = JSON.parse(document.getElementById('student-organization-options').textContent);
     const employeeOptions = JSON.parse(document.getElementById('employee-organization-options').textContent);
 
-    function detectIdType(value) {
-        const cleaned = String(value || '').replace(/\D/g, '');
-        if (cleaned.length === 8) {
+    function getSelectedIdType() {
+        if (studentFlag.checked) {
             return 'student';
         }
-        if (cleaned.length === 7) {
+        if (employeeFlag.checked) {
             return 'employee';
+        }
+        if (otherFlag.checked) {
+            return 'other';
         }
         return null;
     }
 
+    function combinedOrganizationOptions() {
+        const seen = new Set();
+        const combined = [];
+        [...studentOptions, ...employeeOptions].forEach((item) => {
+            if (!item.value || seen.has(item.value)) {
+                return;
+            }
+            seen.add(item.value);
+            combined.push(item);
+        });
+        return combined;
+    }
+
     function updateOrgOptions(idType) {
         const currentValue = organizationSelect.value;
-        const isEmployee = idType === 'employee';
-        const options = isEmployee ? employeeOptions : studentOptions;
-        const placeholder = isEmployee ? 'เลือกหน่วยงาน' : 'เลือกคณะ';
+        let options;
+        let placeholder;
+
+        if (idType === 'employee') {
+            options = employeeOptions;
+            placeholder = 'เลือกหน่วยงาน';
+        } else if (idType === 'other') {
+            options = combinedOrganizationOptions();
+            placeholder = 'เลือกคณะ/หน่วยงาน';
+        } else {
+            options = studentOptions;
+            placeholder = 'เลือกคณะ';
+        }
 
         organizationSelect.innerHTML = '';
 
@@ -286,28 +316,37 @@
         if (idInput.value !== normalized) {
             idInput.value = normalized;
         }
+    }
 
-        const idType = detectIdType(normalized);
-        studentFlag.checked = idType === 'student';
-        employeeFlag.checked = idType === 'employee';
-
+    function setHintForType(idType) {
         if (idType === 'student') {
             hint.textContent = 'Student ID (8 หลัก)';
         } else if (idType === 'employee') {
             hint.textContent = 'Employee ID (7 หลัก)';
+        } else if (idType === 'other') {
+            hint.textContent = 'อื่นๆ: บุคคลภายนอก / ไม่ใช่นักศึกษาหรือบุคลากร';
         } else {
-            hint.textContent = 'กรอก 7 หรือ 8 หลักเพื่อให้ระบบระบุประเภทอัตโนมัติ';
+            hint.textContent = 'กรุณาเลือกประเภทรหัส (Student ID หรือ Employee ID) ด้วยตนเอง';
         }
+    }
 
+    function applyIdType(idType) {
+        studentFlag.checked = idType === 'student';
+        employeeFlag.checked = idType === 'employee';
+        otherFlag.checked = idType === 'other';
+
+        setHintForType(idType);
         updateOrgOptions(idType);
 
         if (hasInitialized && idType !== previousIdType) {
             if (idType === 'student') {
-                announcePolite('ตรวจพบรหัสประเภท Student ID (8 หลัก)');
+                announcePolite('เลือกประเภทรหัส Student ID (8 หลัก)');
             } else if (idType === 'employee') {
-                announcePolite('ตรวจพบรหัสประเภท Employee ID (7 หลัก)');
+                announcePolite('เลือกประเภทรหัส Employee ID (7 หลัก)');
+            } else if (idType === 'other') {
+                announcePolite('เลือกประเภทรหัส อื่นๆ');
             } else {
-                announcePolite('ยังไม่สามารถระบุประเภทรหัสได้ กรุณากรอก 7 หรือ 8 หลัก');
+                announcePolite('ยกเลิกการเลือกประเภทรหัสแล้ว');
             }
         }
 
@@ -317,6 +356,32 @@
 
     idInput.addEventListener('input', updateIndicatorAndSelect);
     updateIndicatorAndSelect();
+
+    studentFlag.addEventListener('change', () => {
+        if (studentFlag.checked) {
+            applyIdType('student');
+        } else if (!employeeFlag.checked && !otherFlag.checked) {
+            applyIdType(null);
+        }
+    });
+
+    employeeFlag.addEventListener('change', () => {
+        if (employeeFlag.checked) {
+            applyIdType('employee');
+        } else if (!studentFlag.checked && !otherFlag.checked) {
+            applyIdType(null);
+        }
+    });
+
+    otherFlag.addEventListener('change', () => {
+        if (otherFlag.checked) {
+            applyIdType('other');
+        } else if (!studentFlag.checked && !employeeFlag.checked) {
+            applyIdType(null);
+        }
+    });
+
+    applyIdType(getSelectedIdType());
 
     const searchBtn = document.getElementById('search-patient-btn');
     const nameInput = document.getElementById('id_name');
@@ -344,7 +409,7 @@
                     nameInput.value = data.name || '';
                     genderSelect.value = data.gender || '';
                     // First we ensure the organization options are correctly populated for this type of ID
-                    updateOrgOptions(detectIdType(val));
+                    updateOrgOptions(getSelectedIdType());
                     // Then we can set the organization value
                     organizationSelect.value = data.organization || '';
 

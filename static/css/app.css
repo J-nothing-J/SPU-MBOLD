@@ -91,8 +91,7 @@ textarea:focus-visible {
 }
 
 .btn:focus-visible,
-.nav-link:focus-visible,
-.quick-btn:focus-visible {
+.nav-link:focus-visible {
     box-shadow: 0 0 0 3px var(--focus-ring-soft);
 }
 
@@ -197,52 +196,6 @@ textarea:focus-visible {
 
 .sidebar-footer .btn {
     width: 100%;
-}
-
-.sidebar-quick-buttons {
-    display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 8px;
-    padding-bottom: 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-.quick-btn {
-    min-height: 86px;
-    border-radius: 20px;
-    border: 1px solid #d7d2ca;
-    background: #ece9e2;
-    color: #313437;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    letter-spacing: 0.3px;
-    text-transform: uppercase;
-    transition: transform 0.2s ease, background 0.2s ease;
-    cursor: pointer;
-}
-
-.quick-btn i {
-    color: #9a5f12;
-    font-size: 1.28rem;
-}
-
-.quick-btn-team {
-    font-family: inherit;
-}
-
-.quick-btn:hover {
-    background: #f3f1eb;
-    transform: translateY(-1px);
-}
-
-.quick-btn.active {
-    background: #e0dbd0;
-    border-color: #c8c0b2;
 }
 
 body.team-modal-open {
@@ -741,6 +694,7 @@ label {
     display: grid;
     gap: 6px;
     font-size: 0.92rem;
+    font-weight: 700;
 }
 
 input,
@@ -914,23 +868,54 @@ th {
 
 .id-type-indicator {
     margin-top: 8px;
-    display: grid;
-    gap: 6px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
 }
 
 .id-type-flag {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.88rem;
-    color: var(--muted);
+    gap: 7px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--ink);
+    background: #fff;
+    border: 2px solid var(--line);
+    border-radius: 999px;
+    padding: 5px 12px;
+    min-height: 34px;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+}
+
+.id-type-flag:hover {
+    background: #fdf1f8;
+    border-color: var(--brand);
+}
+
+.id-type-flag:active {
+    transform: scale(0.97);
+}
+
+.id-type-flag:has(input:checked) {
+    background: var(--brand);
+    border-color: var(--brand-dark);
+    color: #fff;
 }
 
 .id-type-flag input {
-    width: auto;
+    width: 15px;
+    height: 15px;
+    accent-color: var(--brand-dark);
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
 .id-type-hint {
+    flex-basis: 100%;
     font-size: 0.82rem;
     color: var(--muted);
 }
@@ -1513,20 +1498,6 @@ th {
 
     .nav-link {
         min-height: 54px;
-    }
-
-    .sidebar-quick-buttons {
-        gap: 6px;
-    }
-
-    .quick-btn {
-        min-height: 76px;
-        border-radius: 18px;
-        font-size: 0.64rem;
-    }
-
-    .quick-btn i {
-        font-size: 1.1rem;
     }
 
     .bed-map-panel {
