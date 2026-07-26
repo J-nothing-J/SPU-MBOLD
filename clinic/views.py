@@ -27,6 +27,7 @@ from .forms import (
 	UserManagementForm,
 )
 from .models import AppUser, Bed, Case, CaseMedicine, Medicine, Patient
+from .scms import SCMSAPIError, SCMSNotFoundError, fetch_scms_profile
 from .services import create_case_with_medicines, delete_case_and_restore_stock
 
 
@@ -592,16 +593,39 @@ def user_management_view(request):
 
 @login_required
 def api_get_patient(request, student_id):
+	id_type = (request.GET.get('id_type') or '').strip().lower()
+	if id_type not in {Patient.IdType.STUDENT, Patient.IdType.EMPLOYEE}:
+		return JsonResponse(
+			{'error': 'กรุณาเลือกประเภทเป็น นักศึกษา หรือ บุคลากร ก่อนค้นหา'},
+			status=400,
+		)
+
+	normalized_id = (student_id or '').strip()
+	if not normalized_id.isdigit():
+		return JsonResponse({'error': 'รหัสที่ค้นหาต้องเป็นตัวเลขเท่านั้น'}, status=400)
+
+	expected_length = 8 if id_type == Patient.IdType.STUDENT else 7
+	label = 'Student ID' if id_type == Patient.IdType.STUDENT else 'Employee ID'
+	if len(normalized_id) != expected_length:
+		return JsonResponse({'error': f'{label} ต้องมี {expected_length} หลัก'}, status=400)
+
 	try:
-		patient = Patient.objects.get(student_id=student_id)
-		data = {
-			'name': patient.name,
-			'organization': patient.organization,
-			'gender': patient.gender,
-		}
-		return JsonResponse(data)
-	except Patient.DoesNotExist:
-		return JsonResponse({'error': 'Patient not found'}, status=404)
+		data = fetch_scms_profile(student_id=normalized_id, id_type=id_type)
+	except SCMSNotFoundError:
+		return JsonResponse({'error': 'ไม่พบข้อมูลในระบบ SCMS'}, status=404)
+	except SCMSAPIError as exc:
+		status_code = exc.status_code
+		if status_code == 403:
+			message = 'ไม่มีสิทธิ์เข้าถึงข้อมูลจากระบบ SCMS'
+		elif status_code == 429:
+			message = 'ระบบ SCMS ถูกเรียกใช้งานเกินกำหนด กรุณารอสักครู่'
+		elif status_code == 400:
+			message = 'รูปแบบคำขอไปยังระบบ SCMS ไม่ถูกต้อง'
+		else:
+			message = 'ไม่สามารถเชื่อมต่อระบบ SCMS ได้ในขณะนี้ กรุณาลองใหม่อีกครั้ง'
+		return JsonResponse({'error': message}, status=status_code)
+
+	return JsonResponse(data)
 @user_passes_test(_is_active_admin)
 def audit_logs_view(request):
 	limit = 100

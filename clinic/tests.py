@@ -1,8 +1,11 @@
+from unittest.mock import patch
+
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
 from .models import AppUser, Bed, Case, Medicine, Patient
+from .scms import SCMSAPIError, SCMSNotFoundError
 from .services import create_case_with_medicines, delete_case_and_restore_stock
 
 
@@ -359,3 +362,109 @@ class AccessibilityMarkupTests(TestCase):
 		self.assertContains(response, 'id="new-case-live-alert"')
 		self.assertContains(response, 'aria-label="ค้นหาประวัติผู้ป่วย"')
 		self.assertNotContains(response, 'alert(')
+
+
+class ApiGetPatientSCMSTests(TestCase):
+	def setUp(self):
+		self.client = Client()
+		self.nurse = AppUser.objects.create_user(
+			username='nurse_scms',
+			password='nurse1234',
+			role=AppUser.Role.NURSE,
+			status=AppUser.Status.ACTIVE,
+		)
+		self.client.force_login(self.nurse)
+
+	def test_requires_student_or_employee_id_type(self):
+		response = self.client.get(reverse('api_get_patient', args=['66500001']))
+
+		self.assertEqual(response.status_code, 400)
+		self.assertJSONEqual(
+			response.content,
+			{'error': 'กรุณาเลือกประเภทเป็น นักศึกษา หรือ บุคลากร ก่อนค้นหา'},
+		)
+
+	def test_student_lookup_calls_scms_student_path(self):
+		with patch('clinic.views.fetch_scms_profile') as mocked_lookup:
+			mocked_lookup.return_value = {
+				'name': 'Somchai Jaidee',
+				'organization': 'สาขาวิทยาการคอมพิวเตอร์',
+				'gender': Patient.Gender.MALE,
+				'source': 'scms',
+			}
+			response = self.client.get(
+				reverse('api_get_patient', args=['66500001']),
+				{'id_type': 'student'},
+			)
+
+		self.assertEqual(response.status_code, 200)
+		self.assertJSONEqual(
+			response.content,
+			{
+				'name': 'Somchai Jaidee',
+				'organization': 'สาขาวิทยาการคอมพิวเตอร์',
+				'gender': Patient.Gender.MALE,
+				'source': 'scms',
+			},
+		)
+		mocked_lookup.assert_called_once_with(student_id='66500001', id_type='student')
+
+	def test_employee_lookup_calls_scms_staff_path(self):
+		with patch('clinic.views.fetch_scms_profile') as mocked_lookup:
+			mocked_lookup.return_value = {
+				'name': 'John Doe',
+				'organization': 'Faculty of Information Technology',
+				'gender': Patient.Gender.MALE,
+				'source': 'scms',
+			}
+			response = self.client.get(
+				reverse('api_get_patient', args=['1234567']),
+				{'id_type': 'employee'},
+			)
+
+		self.assertEqual(response.status_code, 200)
+		mocked_lookup.assert_called_once_with(student_id='1234567', id_type='employee')
+
+	def test_student_lookup_validates_length(self):
+		response = self.client.get(
+			reverse('api_get_patient', args=['1234567']),
+			{'id_type': 'student'},
+		)
+
+		self.assertEqual(response.status_code, 400)
+		self.assertJSONEqual(response.content, {'error': 'Student ID ต้องมี 8 หลัก'})
+
+	def test_employee_lookup_validates_length(self):
+		response = self.client.get(
+			reverse('api_get_patient', args=['12345678']),
+			{'id_type': 'employee'},
+		)
+
+		self.assertEqual(response.status_code, 400)
+		self.assertJSONEqual(response.content, {'error': 'Employee ID ต้องมี 7 หลัก'})
+
+	def test_scms_not_found_returns_404(self):
+		with patch('clinic.views.fetch_scms_profile', side_effect=SCMSNotFoundError()):
+			response = self.client.get(
+				reverse('api_get_patient', args=['66500001']),
+				{'id_type': 'student'},
+			)
+
+		self.assertEqual(response.status_code, 404)
+		self.assertJSONEqual(response.content, {'error': 'ไม่พบข้อมูลในระบบ SCMS'})
+
+	def test_scms_rate_limit_returns_429(self):
+		with patch(
+			'clinic.views.fetch_scms_profile',
+			side_effect=SCMSAPIError('SCMS request rate limit reached.', status_code=429),
+		):
+			response = self.client.get(
+				reverse('api_get_patient', args=['66500001']),
+				{'id_type': 'student'},
+			)
+
+		self.assertEqual(response.status_code, 429)
+		self.assertJSONEqual(
+			response.content,
+			{'error': 'ระบบ SCMS ถูกเรียกใช้งานเกินกำหนด กรุณารอสักครู่'},
+		)

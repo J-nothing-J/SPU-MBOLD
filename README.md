@@ -80,17 +80,26 @@
    pip install -r requirements.txt
    ```
 
-4. **สร้างโครงสร้างฐานข้อมูล (Run Migrations)**
+4. **ตั้งค่า SPU-SCMS API (สำหรับค้นหาข้อมูลอัตโนมัติจากปุ่ม Search)**
+   ```powershell
+   $env:SCMS_API_BASE_URL="https://apiscms.spu.ac.th/rest/spu_api"
+   $env:SCMS_API_KEY="<your_api_key>"
+   $env:SCMS_API_SECRET="<your_api_secret>"
+   $env:SCMS_API_TIMEOUT="10"
+   ```
+   หมายเหตุ: หากไม่ตั้งค่า API key/secret ปุ่มค้นหาจะไม่สามารถดึงข้อมูลจาก SCMS ได้
+
+5. **สร้างโครงสร้างฐานข้อมูล (Run Migrations)**
    ```powershell
    python manage.py migrate
    ```
 
-5. **จำลองข้อมูลเริ่มต้นเพื่อพร้อมทดสอบระบบ (Seeding Data)**
+6. **จำลองข้อมูลเริ่มต้นเพื่อพร้อมทดสอบระบบ (Seeding Data)**
    ```powershell
    python manage.py seed_initial_data
    ```
 
-6. **เปิดใช้งานเซิร์ฟเวอร์ (Start Development Server)**
+7. **เปิดใช้งานเซิร์ฟเวอร์ (Start Development Server)**
    ```powershell
    python manage.py runserver
    ```

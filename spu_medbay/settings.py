@@ -20,11 +20,40 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
+def load_env_file(path: Path) -> None:
+    if not path.exists():
+        return
+
+    for raw_line in path.read_text(encoding='utf-8').splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith('#') or '=' not in line:
+            continue
+
+        key, value = line.split('=', 1)
+        key = key.strip()
+        value = value.strip().strip('"').strip("'")
+        if key and key not in os.environ:
+            os.environ[key] = value
+
+
+load_env_file(BASE_DIR / '.env')
+
+
 def env_bool(name: str, default: bool = False) -> bool:
     raw = os.getenv(name)
     if raw is None:
         return default
     return raw.strip().lower() in {'1', 'true', 'yes', 'on'}
+
+
+def env_float(name: str, default: float) -> float:
+    raw = os.getenv(name)
+    if raw is None:
+        return default
+    try:
+        return float(raw)
+    except ValueError:
+        return default
 
 
 # Quick-start development settings - unsuitable for production
@@ -47,6 +76,11 @@ CSRF_TRUSTED_ORIGINS = [
     for origin in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',')
     if origin.strip()
 ]
+
+SCMS_API_BASE_URL = os.getenv('SCMS_API_BASE_URL', 'https://apiscms.spu.ac.th/rest/spu_api').rstrip('/')
+SCMS_API_KEY = os.getenv('SCMS_API_KEY', '')
+SCMS_API_SECRET = os.getenv('SCMS_API_SECRET', '')
+SCMS_API_TIMEOUT = env_float('SCMS_API_TIMEOUT', default=10.0)
 
 
 # Application definition

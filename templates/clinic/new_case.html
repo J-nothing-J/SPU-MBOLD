@@ -213,6 +213,9 @@
     const hint = document.getElementById('id-type-hint');
     const liveStatus = document.getElementById('new-case-live-status');
     const liveAlert = document.getElementById('new-case-live-alert');
+    const searchBtn = document.getElementById('search-patient-btn');
+    const nameInput = document.getElementById('id_name');
+    const genderSelect = document.getElementById('id_gender');
     let previousIdType = null;
     let hasInitialized = false;
 
@@ -254,6 +257,20 @@
             return 'other';
         }
         return null;
+    }
+
+    function isSearchableIdType(idType) {
+        return idType === 'student' || idType === 'employee';
+    }
+
+    function updateSearchButtonAvailability(idType) {
+        if (!searchBtn) {
+            return;
+        }
+
+        const searchable = isSearchableIdType(idType);
+        searchBtn.disabled = !searchable;
+        searchBtn.title = searchable ? 'ค้นหาประวัติ' : 'เลือก นักศึกษา หรือ บุคลากร ก่อนค้นหา';
     }
 
     function combinedOrganizationOptions() {
@@ -337,6 +354,7 @@
 
         setHintForType(idType);
         updateOrgOptions(idType);
+        updateSearchButtonAvailability(idType);
 
         if (hasInitialized && idType !== previousIdType) {
             if (idType === 'student') {
@@ -383,15 +401,31 @@
 
     applyIdType(getSelectedIdType());
 
-    const searchBtn = document.getElementById('search-patient-btn');
-    const nameInput = document.getElementById('id_name');
-    const genderSelect = document.getElementById('id_gender');
-
     if (searchBtn && nameInput && genderSelect) {
         searchBtn.addEventListener('click', () => {
             const val = idInput.value;
+            const selectedIdType = getSelectedIdType();
+
+            if (selectedIdType === 'other') {
+                announceAlert('ประเภท อื่นๆ ไม่รองรับการค้นหาอัตโนมัติ กรุณากรอกข้อมูลด้วยตนเอง');
+                return;
+            }
+            if (!isSearchableIdType(selectedIdType)) {
+                announceAlert('กรุณาเลือกประเภทเป็น นักศึกษา หรือ บุคลากร ก่อนค้นหา');
+                return;
+            }
             if (!val || val.length < 7) {
                 announceAlert('กรุณากรอกรหัส 7 หรือ 8 หลักให้ครบถ้วนก่อนค้นหา');
+                idInput.focus();
+                return;
+            }
+            if (selectedIdType === 'student' && val.length !== 8) {
+                announceAlert('Student ID ต้องมี 8 หลัก');
+                idInput.focus();
+                return;
+            }
+            if (selectedIdType === 'employee' && val.length !== 7) {
+                announceAlert('Employee ID ต้องมี 7 หลัก');
                 idInput.focus();
                 return;
             }
@@ -400,10 +434,13 @@
             searchBtn.disabled = true;
             announcePolite('กำลังค้นหาประวัติผู้ป่วย');
 
-            fetch(`/api/patients/${val}/`)
-                .then(res => {
-                    if (!res.ok) throw new Error('Not found');
-                    return res.json();
+            fetch(`/api/patients/${val}/?id_type=${encodeURIComponent(selectedIdType)}`)
+                .then(async (res) => {
+                    const payload = await res.json().catch(() => ({}));
+                    if (!res.ok) {
+                        throw new Error(payload.error || 'ไม่สามารถค้นหาข้อมูลจากระบบ SCMS ได้');
+                    }
+                    return payload;
                 })
                 .then(data => {
                     nameInput.value = data.name || '';
@@ -416,11 +453,11 @@
                     announcePolite('พบข้อมูลผู้ป่วยเดิม ระบบเติมข้อมูลให้อัตโนมัติแล้ว');
                 })
                 .catch(err => {
-                    announcePolite('ไม่พบข้อมูลผู้ป่วย ระบบพร้อมให้กรอกข้อมูลผู้ป่วยใหม่');
+                    announceAlert(err.message || 'ไม่สามารถค้นหาข้อมูลจากระบบ SCMS ได้');
                 })
                 .finally(() => {
                     searchBtn.innerHTML = '<i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i><span class="sr-only">ค้นหาประวัติผู้ป่วย</span>';
-                    searchBtn.disabled = false;
+                    searchBtn.disabled = !isSearchableIdType(getSelectedIdType());
                 });
         });
     }
